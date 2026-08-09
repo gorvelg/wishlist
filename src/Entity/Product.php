@@ -49,6 +49,10 @@ class Product
     public function __construct()
     {
         $this->productUsers = new ArrayCollection();
+
+        $now = new \DateTimeImmutable();
+        $this->createdAt = $now;
+        $this->updatedAt = $now;
     }
 
     public function getId(): ?int

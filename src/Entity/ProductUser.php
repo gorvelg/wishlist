@@ -22,6 +22,13 @@ class ProductUser
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
+    public function __construct()
+    {
+        $now = new \DateTimeImmutable();
+
+        $this->createdAt = $now;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

@@ -48,9 +48,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: ProductUser::class, mappedBy: 'User')]
     private Collection $productUsers;
 
+    /**
+     * @var Collection<int, WishlistOwner>
+     */
+    #[ORM\OneToMany(targetEntity: WishlistOwner::class, mappedBy: 'user')]
+    private Collection $wishlist;
+
+    /**
+     * @var Collection<int, WishlistOwner>
+     */
+    #[ORM\OneToMany(targetEntity: WishlistOwner::class, mappedBy: 'user')]
+    private Collection $wishlistOwners;
+
     public function __construct()
     {
         $this->productUsers = new ArrayCollection();
+        $this->wishlist = new ArrayCollection();
+        $this->wishlistOwners = new ArrayCollection();
     }
 
 
@@ -189,6 +203,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($productUser->getUser() === $this) {
                 $productUser->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, WishlistOwner>
+     */
+    public function getWishlist(): Collection
+    {
+        return $this->wishlist;
+    }
+
+    public function addWishlist(WishlistOwner $wishlist): static
+    {
+        if (!$this->wishlist->contains($wishlist)) {
+            $this->wishlist->add($wishlist);
+            $wishlist->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWishlist(WishlistOwner $wishlist): static
+    {
+        if ($this->wishlist->removeElement($wishlist)) {
+            // set the owning side to null (unless already changed)
+            if ($wishlist->getUser() === $this) {
+                $wishlist->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, WishlistOwner>
+     */
+    public function getWishlistOwners(): Collection
+    {
+        return $this->wishlistOwners;
+    }
+
+    public function addWishlistOwner(WishlistOwner $wishlistOwner): static
+    {
+        if (!$this->wishlistOwners->contains($wishlistOwner)) {
+            $this->wishlistOwners->add($wishlistOwner);
+            $wishlistOwner->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWishlistOwner(WishlistOwner $wishlistOwner): static
+    {
+        if ($this->wishlistOwners->removeElement($wishlistOwner)) {
+            // set the owning side to null (unless already changed)
+            if ($wishlistOwner->getUser() === $this) {
+                $wishlistOwner->setUser(null);
             }
         }
 

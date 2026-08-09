@@ -1,0 +1,24 @@
+DirectoryIndex index.php
+
+<IfModule mod_negotiation.c>
+    Options -MultiViews
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Préserve le header Authorization
+    RewriteCond %{HTTP:Authorization} .+
+    RewriteRule ^ - [E=HTTP_AUTHORIZATION:%0]
+
+    # Évite d'afficher index.php dans les URLs
+    RewriteCond %{ENV:REDIRECT_STATUS} =""
+    RewriteRule ^index\.php(?:/(.*)|$) /$1 [R=301,L]
+
+    # Si le fichier demandé existe réellement, Apache le sert directement
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    # Toutes les autres requêtes passent par Symfony
+    RewriteRule ^ index.php [L]
+</IfModule>
