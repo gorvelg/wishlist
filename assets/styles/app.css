@@ -1,7 +1,2 @@
-body {
-    background-color: #FFF8F0;
-}
-
-h1{
-    font-family: "Fraunces", serif;
-}
+@import "tailwindcss";
+@source not "../../public";

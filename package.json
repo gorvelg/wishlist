@@ -1,0 +1,21 @@
+{
+    "scripts": {
+        "dev": "encore dev",
+        "watch": "encore dev --watch",
+        "build": "encore production"
+    },
+    "devDependencies": {
+        "@hotwired/stimulus": "^3.0.0",
+        "@hotwired/turbo": "^7.1.0 || ^8.0",
+        "@symfony/stimulus-bridge": "^3.2.0 || ^4.0.0",
+        "@symfony/ux-turbo": "file:vendor/symfony/ux-turbo/assets",
+        "@symfony/webpack-encore": "^7.2.0",
+        "typescript": "^6.0.3"
+    },
+    "dependencies": {
+        "@tailwindcss/postcss": "^4.3.3",
+        "postcss": "^8.5.26",
+        "postcss-loader": "^8.2.1",
+        "tailwindcss": "^4.3.3"
+    }
+}
