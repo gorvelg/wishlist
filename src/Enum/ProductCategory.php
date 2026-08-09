@@ -11,7 +11,7 @@ enum ProductCategory: string
     case BEDROOM = 'bedroom';
     case CLOTHING = 'clothing';
 
-    public function toFrench(){
+    public function toFrench(): string{
         return match ($this){
             self::MEAL => 'repas',
             self::HYGIENE => 'hygiene',

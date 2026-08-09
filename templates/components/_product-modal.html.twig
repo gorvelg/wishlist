@@ -1,0 +1,56 @@
+<dialog
+    data-modal-target="dialog"
+    class="
+        w-[500px] max-w-[90vw] rounded-2xl p-6 backdrop:bg-black/30 backdrop:backdrop-blur-sm absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+    "
+>
+        <div class="absolute top-0 right-0 w-24 h-24 rounded-bl-full bg-[#FFE66D] opacity-30"></div>
+
+
+            <div class="flex items-center justify-between mb-6">
+                <button
+                    type="button"
+                    data-action="click->modal#close"
+                >
+                    ✕
+                </button>
+            </div>
+
+            <h2 class="font-display text-2xl font-semibold text-[#2D2D2D] mb-6">Ajouter un souhait</h2>
+
+            <div>
+                {{ form_start(form,{
+                    attr: {
+                        'data-turbo': 'false'
+                    }
+                }) }}
+                    {{ form_row(form.name) }}
+                    <div class="grid grid-cols-2 gap-4">
+                        {{ form_row(form.category) }}
+                        {{ form_row(form.status) }}
+                    </div>
+                    {{ form_row(form.price) }}
+                    {{ form_row(form.image) }}
+                    {{ form_row(form.url) }}
+                    {{ form_row(form.description) }}
+
+                <div class="flex justify-end gap-3 mt-6">
+                    <button
+                        type="button"
+                        data-action="click->modal#close"
+                    >
+                        Annuler
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="bg-[#FF6B6B] text-white font-semibold px-5 py-2 rounded-full hover:bg-[#e85555]"
+                    >
+                        Ajouter
+                    </button>
+                </div>
+                {{ form_end(form) }}
+            </div>
+
+    </dialog>
+

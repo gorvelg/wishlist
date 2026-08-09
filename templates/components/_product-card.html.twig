@@ -1,6 +1,17 @@
-<article>
-    <div>
-            <p> {{ name }}</p>
-            <p> {{ description }}</p>
+<article class="relative rounded-2xl border bg-white overflow-hidden flex flex-col transition-shadow hover:shadow-lg
+        border-[rgba(45,45,45,0.1)]">
+    <div class="h-36 w-full overflow-hidden relative">
+        <img class="w-full h-full object-cover" src="{{ asset(product_upload_path ~ image) }}" alt="{{ name }}">
+        <div class="absolute inset-0" style="background: linear-gradient(transparent 40%, rgba(0, 0, 0, 0.18) 100%);"></div>
+        <div class="absolute bottom-0 left-0 h-1 w-full" style="background: rgb(255, 154, 92);"></div>
+    </div>
+    <div class="p-5 flex flex-col gap-3 flex-1 bg-white">
+        <h3 class="font-semibold"> {{ name }}</h3>
+        <p class="text-xs mt-2"> {{ description }}</p>
+        <div class="flex items-center gap-2 pt-1">
+            <button class="ml-auto text-xs bg-[#FFF8F0] border border-[rgba(45,45,45,0.12)] text-[#2D2D2D] font-medium px-3 py-1.5 rounded-lg hover:bg-[#FFE66D] transition-colors">
+                Offrir
+            </button>
+        </div>
     </div>
 </article>
