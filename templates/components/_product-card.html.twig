@@ -8,15 +8,31 @@
         <div class="absolute inset-0" style="background: linear-gradient(transparent 40%, rgba(0, 0, 0, 0.18) 100%);"></div>
         <div class="absolute bottom-0 left-0 h-1 w-full" style="background: rgb(255, 154, 92);"></div>
 
+        {% set badgeColors = [
+            'bg-red-100 text-red-700',
+            'bg-blue-100 text-blue-700',
+            'bg-green-100 text-green-700',
+            'bg-yellow-100 text-yellow-700',
+            'bg-purple-100 text-purple-700',
+            'bg-pink-100 text-pink-700',
+            'bg-orange-100 text-orange-700',
+            'bg-teal-100 text-teal-700'
+        ] %}
+
         {% if productUsers|length > 0 %}
             <div class="absolute left-5 bottom-2.5 flex items-center gap-1">
                 {% for productUser in productUsers %}
+
+                    {% set user = productUser.user %}
+                    {% set color = badgeColors[user.id % badgeColors|length] %}
+
                     <span
-                        class="flex items-center justify-center size-7 rounded-full bg-gray-200 border-2 border-white text-xs font-semibold"
-                        title="{{ productUser.user.firstname }} {{ productUser.user.lastname }}"
+                        class="flex items-center justify-center size-7 rounded-full border-2 border-white text-xs font-semibold {{ color }}"
+                        title="{{ user.firstname }} {{ user.lastname }}"
                     >
-                {{ productUser.user.initials }}
+                {{ user.initials }}
             </span>
+
                 {% endfor %}
             </div>
         {% endif %}
