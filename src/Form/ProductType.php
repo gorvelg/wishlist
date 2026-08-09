@@ -66,7 +66,7 @@ class ProductType extends AbstractType
                 'class' => ProductCategory::class,
                 'choice_label' => fn (ProductCategory $category) => $category->toFrench(),
                 'attr' => [
-                    'class' => 'w-full rounded-xl border border-[rgba(45,45,45,0.15)] px-4 py-2.5 text-[#2D2D2D] text-sm focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/60 transition',
+                    'class' => 'w-full rounded-xl border border-[rgba(45,45,45,0.15)] px-4 py-2.5 text-[#2D2D2D] text-sm capitalize focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/60 transition',
                 ],
                 'label_attr' => [
                     'class' => 'text-sm font-medium text-[#6B6B6B] mb-1 block'
@@ -75,8 +75,9 @@ class ProductType extends AbstractType
             ->add('status', EnumType::class, [
                 'label' => 'Statut',
                 'class' => ProductStatus::class,
+                'choice_label' => fn (ProductStatus $status) => $status->toFrench(),
                 'attr' => [
-                    'class' => 'w-full rounded-xl border border-[rgba(45,45,45,0.15)] px-4 py-2.5 text-[#2D2D2D] text-sm focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/60 transition'
+                    'class' => 'w-full rounded-xl border border-[rgba(45,45,45,0.15)] px-4 py-2.5 text-[#2D2D2D] capitalize text-sm focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/60 transition'
                 ],
                 'label_attr' => [
                     'class' => 'text-sm font-medium text-[#6B6B6B] mb-1 block'
@@ -100,6 +101,9 @@ class ProductType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Product::class,
+            'attr' => [
+                'class' => 'flex flex-col gap-4'
+            ]
         ]);
     }
 }

@@ -1,0 +1,14 @@
+{% set variants = {
+    meal: 'bg-blue-200 text-blue-700 ring-blue-700/10',
+    hygiene: 'bg-green-200 text-green-700 ring-green-600/20',
+    awakening: 'bg-purple-200 text-purple-700 ring-purple-700/10',
+    travel: 'bg-red-200 text-red-700 ring-red-600/10',
+    bedroom: 'bg-gray-200 text-gray-600 ring-gray-500/10',
+    clothing: 'bg-pink-200 text-pink-700 ring-pink-600/20',
+} %}
+
+{% set variantClasses = variants[variant] ?? 'bg-gray-200 text-gray-600 ring-gray-500/10' %}
+
+<span class="text-[10px] font-bold uppercase tracking-wider w-fit px-2.5 py-1 rounded-full  text-black {{ variantClasses }}">
+    {{ label }}
+</span>

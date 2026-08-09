@@ -6,7 +6,15 @@
         <div class="absolute bottom-0 left-0 h-1 w-full" style="background: rgb(255, 154, 92);"></div>
     </div>
     <div class="p-5 flex flex-col gap-3 flex-1 bg-white">
-        <h3 class="font-semibold"> {{ name }}</h3>
+
+        <div class="flex justify-between gap-2">
+            <h3 class="font-semibold"> {{ name }}</h3>
+            {% include 'components/_tag.html.twig' with {
+                label: category.toFrench(),
+                variant: category.value
+            } only %}
+        </div>
+
         <p class="text-xs mt-2"> {{ description }}</p>
         <div class="flex items-center gap-2 pt-1">
             <button class="ml-auto text-xs bg-[#FFF8F0] border border-[rgba(45,45,45,0.12)] text-[#2D2D2D] font-medium px-3 py-1.5 rounded-lg hover:bg-[#FFE66D] transition-colors">

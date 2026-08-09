@@ -69,7 +69,8 @@
                 {% include ('components/_product-card.html.twig') with {
                     name: product.name,
                     description: product.description,
-                    image: product.image
+                    image: product.image,
+                    category: product.category
                 } only %}
             {% endfor %}
         </div>
