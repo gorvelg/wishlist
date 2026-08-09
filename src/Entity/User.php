@@ -6,11 +6,13 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -39,8 +41,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $lastname = null;
 
-    #[ORM\Column]
-    private ?string $initials = null;
 
     /**
      * @var Collection<int, ProductUser>
@@ -169,14 +169,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->lastname = $lastname;
     }
 
-    public function getInitials(): ?string
+    public function getInitials(): string
     {
-        return $this->initials;
-    }
+        $firstNameInitial = $this->firstname
+            ? mb_strtoupper(mb_substr($this->firstname, 0, 1))
+            : '';
 
-    public function setInitials(?string $initials): void
-    {
-        $this->initials = $initials;
+        $lastNameInitial = $this->lastname
+            ? mb_strtoupper(mb_substr($this->lastname, 0, 1))
+            : '';
+
+        return $firstNameInitial . $lastNameInitial;
     }
 
     /**

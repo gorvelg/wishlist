@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Enum\ProductCategory;
+use App\Enum\ProductStatus;
 use App\Repository\ProductRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -29,10 +31,10 @@ class Product
     private ?string $url = null;
 
     #[ORM\Column(length: 30)]
-    private ?string $category = null;
+    private ?ProductCategory $category = null;
 
     #[ORM\Column(length: 30)]
-    private ?string $status = null;
+    private ?ProductStatus $status = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -45,6 +47,13 @@ class Product
      */
     #[ORM\OneToMany(targetEntity: ProductUser::class, mappedBy: 'product')]
     private Collection $productUsers;
+
+    #[ORM\ManyToOne(inversedBy: 'products')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Wishlist $wishlist = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $description = null;
 
     public function __construct()
     {
@@ -108,24 +117,24 @@ class Product
         return $this;
     }
 
-    public function getCategory(): ?string
+    public function getCategory(): ?ProductCategory
     {
         return $this->category;
     }
 
-    public function setCategory(string $category): static
+    public function setCategory(ProductCategory $category): static
     {
         $this->category = $category;
 
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): ?ProductStatus
     {
         return $this->status;
     }
 
-    public function setStatus(string $status): static
+    public function setStatus(ProductStatus $status): static
     {
         $this->status = $status;
 
@@ -182,6 +191,30 @@ class Product
                 $productUser->setProduct(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getWishlist(): ?Wishlist
+    {
+        return $this->wishlist;
+    }
+
+    public function setWishlist(?Wishlist $wishlist): static
+    {
+        $this->wishlist = $wishlist;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
 
         return $this;
     }

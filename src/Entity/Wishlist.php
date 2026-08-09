@@ -33,13 +33,21 @@ class Wishlist
     #[ORM\OneToMany(targetEntity: WishlistOwner::class, mappedBy: 'wishlist')]
     private Collection $wishlistOwners;
 
+    /**
+     * @var Collection<int, Product>
+     */
+    #[ORM\OneToMany(targetEntity: Product::class, mappedBy: 'wishlist')]
+    private Collection $products;
+
     public function __construct()
     {
         $now = new \DateTimeImmutable();
 
         $this->createdAt = $now;
         $this->updatedAt = $now;
+        $this->accessToken = bin2hex(random_bytes(32));
         $this->wishlistOwners = new ArrayCollection();
+        $this->products = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -119,6 +127,36 @@ class Wishlist
             // set the owning side to null (unless already changed)
             if ($wishlistOwner->getWishlist() === $this) {
                 $wishlistOwner->setWishlist(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Product>
+     */
+    public function getProducts(): Collection
+    {
+        return $this->products;
+    }
+
+    public function addProduct(Product $product): static
+    {
+        if (!$this->products->contains($product)) {
+            $this->products->add($product);
+            $product->setWishlist($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProduct(Product $product): static
+    {
+        if ($this->products->removeElement($product)) {
+            // set the owning side to null (unless already changed)
+            if ($product->getWishlist() === $this) {
+                $product->setWishlist(null);
             }
         }
 
