@@ -25,5 +25,27 @@
     </head>
     <body>
             {% block body %}{% endblock %}
+
+            {% set flashClasses = {
+                success: 'border-green-200 bg-green-50 text-green-800',
+                error: 'border-red-200 bg-red-50 text-red-800',
+                warning: 'border-yellow-200 bg-yellow-50 text-yellow-800',
+                info: 'border-blue-200 bg-blue-50 text-blue-800'
+            } %}
+
+            {% for type, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
+                        <div
+                            data-controller="flash"
+                            class="pointer-events-auto opacity-0 -translate-y-2 transition-all duration-500 ease-out"
+                        >
+                            <div class="rounded-xl border px-4 py-3 text-sm {{ flashClasses[type] ?? 'border-gray-200 bg-gray-50 text-gray-800' }}">
+                                {{ message }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endfor %}
     </body>
 </html>

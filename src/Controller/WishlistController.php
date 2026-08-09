@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Product;
+use App\Entity\ProductUser;
 use App\Entity\Wishlist;
 use App\Enum\ProductStatus;
 use App\Form\ProductType;
@@ -23,60 +24,76 @@ final class WishlistController extends AbstractController
         SluggerInterface $slugger,
         EntityManagerInterface $em
     ): Response {
+        $wishlist = $em->getRepository(Wishlist::class)
+            ->findOneBy(['accessToken' => $token]);
 
-        $wishlist = $em->getRepository(Wishlist::class)->findOneBy(['accessToken' => $token]);
         if (!$wishlist) {
             throw $this->createNotFoundException();
         }
 
-        // Création d'un nouveau produit
+        $user = $this->getUser();
 
-        $product = new Product();
-        $product->setWishlist($wishlist);
+        $isOwner = $user !== null
+            && $wishlist->getWishlistOwners()->contains($user);
 
-        $form = $this->createForm(ProductType::class, $product);
-        $form->handleRequest($request);
+        $form = null;
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($isOwner) {
+            $product = new Product();
+            $product->setWishlist($wishlist);
 
-            // upload de de l'image
+            $form = $this->createForm(ProductType::class, $product);
+            $form->handleRequest($request);
 
-            $image = $form->get('image')->getData();
+            if ($form->isSubmitted() && $form->isValid()) {
+                $image = $form->get('image')->getData();
 
-            if ($image) {
-                $originalFilename = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$image->guessExtension();
+                if ($image) {
+                    $originalFilename = pathinfo(
+                        $image->getClientOriginalName(),
+                        PATHINFO_FILENAME
+                    );
 
-                try {
-                    $image->move('uploads', $newFilename);
-                } catch (FileException $e) {
-                    $this->addFlash('error','Une erreur est survenue lors de l\'upload du fichier');
+                    $safeFilename = $slugger->slug($originalFilename);
+
+                    $newFilename = $safeFilename
+                        . '-'
+                        . uniqid()
+                        . '.'
+                        . $image->guessExtension();
+
+                    try {
+                        $image->move('uploads', $newFilename);
+                        $product->setImage($newFilename);
+                    } catch (FileException $e) {
+                        $this->addFlash(
+                            'error',
+                            'Une erreur est survenue lors de l\'upload du fichier'
+                        );
+                    }
                 }
-                $product->setImage($newFilename);
+
+                $em->persist($product);
+                $em->flush();
+
+                return $this->redirectToRoute('app_home', [
+                    'token' => $wishlist->getAccessToken(),
+                ]);
             }
-
-
-            $em->persist($product);
-            $em->flush();
-            return $this->redirectToRoute('app_home', [
-                'token' => $wishlist->getAccessToken(),
-            ]);
         }
 
-        // tous les produits
         $products = $wishlist->getProducts();
+
         $countProducts = count($products);
 
-        // produits achetés
         $giftedProducts = 0;
+
         foreach ($products as $product) {
-            if ($product->getStatus() === ProductStatus::PURCHASED ){
+            if ($product->getStatus() === ProductStatus::PURCHASED) {
                 $giftedProducts++;
             }
         }
 
-        // produits restants
         $remainingProducts = $countProducts - $giftedProducts;
 
 
@@ -88,6 +105,76 @@ final class WishlistController extends AbstractController
             'giftedProducts' => $giftedProducts,
             'remainingProducts' => $remainingProducts,
             'form' => $form,
+            'isOwner' => $isOwner,
+        ]);
+    }
+
+    #[Route(
+        '/wishlist/{token}/product/{id}/purchase',
+        name: 'app_product_purchase',
+        methods: ['POST']
+    )]
+    public function purchase(
+        string $token,
+        Product $product,
+        EntityManagerInterface $em,
+    ): Response {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        $user = $this->getUser();
+
+        if ($product->getWishlist()?->getAccessToken() !== $token) {
+            throw $this->createNotFoundException();
+        }
+
+        $existingProductUser = $em
+            ->getRepository(ProductUser::class)
+            ->findOneBy([
+                'product' => $product,
+                'User' => $user,
+            ]);
+
+        if ($existingProductUser !== null) {
+            $this->addFlash(
+                'error',
+                'Vous avez déjà réservé ce produit.'
+            );
+
+            return $this->redirectToRoute('app_home', [
+                'token' => $token,
+            ]);
+        }
+
+        // Si le produit est définitivement acheté
+        if ($product->getStatus() === ProductStatus::PURCHASED) {
+            $this->addFlash(
+                'error',
+                'Ce produit a déjà été offert.'
+            );
+
+            return $this->redirectToRoute('app_home', [
+                'token' => $token,
+            ]);
+        }
+
+        $productUser = new ProductUser();
+
+        $productUser
+            ->setProduct($product)
+            ->setUser($user);
+
+        $product->setStatus(ProductStatus::BUYING);
+
+        $em->persist($productUser);
+        $em->flush();
+
+        $this->addFlash(
+            'success',
+            'Le cadeau a bien été réservé.'
+        );
+
+        return $this->redirectToRoute('app_home', [
+            'token' => $token,
         ]);
     }
 }

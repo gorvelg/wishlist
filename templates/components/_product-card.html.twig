@@ -1,11 +1,28 @@
 <article class="relative rounded-2xl border bg-white overflow-hidden flex flex-col transition-shadow hover:shadow-lg
         border-[rgba(45,45,45,0.1)]">
+    {% if status.value === 'purchased' %}
+        <div class="absolute inset-0 bg-white/70 flex flex-col items-center justify-center z-10 rounded-2xl"></div>
+    {% endif %}
     <div class="h-36 w-full overflow-hidden relative">
         <img class="w-full h-full object-cover" src="{{ asset(product_upload_path ~ image) }}" alt="{{ name }}">
         <div class="absolute inset-0" style="background: linear-gradient(transparent 40%, rgba(0, 0, 0, 0.18) 100%);"></div>
         <div class="absolute bottom-0 left-0 h-1 w-full" style="background: rgb(255, 154, 92);"></div>
+
+        {% if productUsers|length > 0 %}
+            <div class="absolute left-5 bottom-2.5 flex items-center gap-1">
+                {% for productUser in productUsers %}
+                    <span
+                        class="flex items-center justify-center size-7 rounded-full bg-gray-200 border-2 border-white text-xs font-semibold"
+                        title="{{ productUser.user.firstname }} {{ productUser.user.lastname }}"
+                    >
+                {{ productUser.user.initials }}
+            </span>
+                {% endfor %}
+            </div>
+        {% endif %}
+
     </div>
-    <div class="p-5 flex flex-col gap-3 flex-1 bg-white">
+    <div class="p-5 flex flex-col gap-3 flex-1 bg-white justify-between">
 
         <div class="flex justify-between gap-2">
             <h3 class="font-semibold"> {{ name }}</h3>
@@ -14,12 +31,54 @@
                 variant: category.value
             } only %}
         </div>
+        {% if description is not null %}
+            <p class="text-xs mt-2"> {{ description }}</p>
+        {% endif %}
+        <div>
 
-        <p class="text-xs mt-2"> {{ description }}</p>
-        <div class="flex items-center gap-2 pt-1">
-            <button class="ml-auto text-xs bg-[#FFF8F0] border border-[rgba(45,45,45,0.12)] text-[#2D2D2D] font-medium px-3 py-1.5 rounded-lg hover:bg-[#FFE66D] transition-colors">
-                Offrir
-            </button>
+            <p class="text-sm font-semibold text-[#2D2D2D] mt-2"> {{ price }} €</p>
+            <div class="flex items-center gap-2 mt-2 pt-1">
+                <a href="{{ url }}" class="flex items-center gap-1 text-xs font-semibold text-white bg-[#4ECDC4] hover:bg-[#3ab8b0] active:scale-95 transition px-3 py-1.5 rounded-lg">
+                    Voir
+                </a>
+                {% if status.value != 'purchased' %}
+                    {% if app.user %}
+                        <form
+                            action="{{ path('app_product_purchase', {
+                                token: wishlistToken,
+                                id: productId
+                            }) }}"
+                            method="post"
+                            class="ml-auto"
+                        >
+                            <input
+                                type="hidden"
+                                name="_token"
+                                value="{{ csrf_token('purchase-' ~ productId) }}"
+                            >
+
+                            <button
+                                type="submit"
+                                class="text-xs bg-[#FFF8F0] border border-[rgba(45,45,45,0.12)] text-[#2D2D2D] font-medium px-3 py-1.5 rounded-lg hover:bg-[#FFE66D] transition-colors"
+                            >
+                                Offrir
+                            </button>
+                        </form>
+                    {% else %}
+                        <a
+                            href="{{ path('app_login', {
+                                _target_path: path('app_home', {
+                                    token: wishlistToken
+                                })
+                            }) }}"
+                            class="ml-auto text-xs bg-[#FFF8F0] border border-[rgba(45,45,45,0.12)] text-[#2D2D2D] font-medium px-3 py-1.5 rounded-lg hover:bg-[#FFE66D] transition-colors"
+                        >
+                            Offrir
+                        </a>
+                    {% endif %}
+                {% endif %}
+            </div>
         </div>
+
     </div>
 </article>
