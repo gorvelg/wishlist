@@ -60,6 +60,9 @@
                 <a href="{{ url }}" class="flex items-center gap-1 text-xs font-semibold text-white bg-[#4ECDC4] hover:bg-[#3ab8b0] active:scale-95 transition px-3 py-1.5 rounded-lg">
                     Voir
                 </a>
+
+
+
                 {% if status.value != 'purchased' %}
                     {% if app.user %}
                         <form
@@ -89,7 +92,7 @@
                     {% else %}
                         <a
                             href="{{ path('app_login', {
-                                _target_path: path('app_home', {
+                                redirect: path('app_wishlist', {
                                     token: wishlistToken
                                 })
                             }) }}"

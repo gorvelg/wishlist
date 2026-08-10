@@ -1,38 +1,769 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Log in!{% endblock %}
+{% block title %}Connexion{% endblock %}
 
 {% block body %}
-    <form method="post">
-        {% if error %}
-            <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-        {% endif %}
 
-        {% if app.user %}
-            <div class="mb-3">
-                You are logged in as {{ app.user.userIdentifier }}, <a href="{{ logout_path() }}">Logout</a>
+    {% set activeTab = active_tab|default('login') %}
+
+    <div
+        class="min-h-screen bg-[#FFF8F0] flex"
+        style="font-family: Outfit, system-ui, sans-serif;"
+        data-controller="auth"
+        data-auth-active-value="{{ activeTab }}"
+    >
+
+        <div
+            class="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col justify-between p-12"
+        >
+
+            <img
+                alt="Adult hand holding tiny baby hand"
+                class="absolute inset-0 w-full h-full object-cover"
+                src="https://images.unsplash.com/photo-1582486225644-aeacf6aa0b1b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=900&q=80"
+            >
+
+            <div
+                class="absolute inset-0 bg-gradient-to-br from-[#FF6B6B]/60 to-[#2D2D2D]/80"
+            ></div>
+
+
+            {# Logo #}
+
+            <div class="relative z-10 flex items-center gap-2">
+                <a
+                    class="flex items-center gap-2"
+                    href="{{ path('app_home') }}"
+                >
+                    <span class="text-xl">
+                        🌿
+                    </span>
+
+                    <span
+                        class="font-title text-white text-xl font-semibold"
+
+                    >
+                        myWishlist
+                    </span>
+                </a>
             </div>
-        {% endif %}
 
-        <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-        <label for="username">Email</label>
-        <input type="email" value="{{ last_username }}" name="_username" id="username" class="form-control" autocomplete="email" required autofocus>
-        <label for="password">Password</label>
-        <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" required>
-        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
 
-        {#
-            Uncomment this section and add a remember_me option below your firewall to activate remember me functionality.
-            See https://symfony.com/doc/current/security/remember_me.html
+            {# Text #}
 
-            <div class="checkbox mb-3">
-                <input type="checkbox" name="_remember_me" id="_remember_me">
-                <label for="_remember_me">Remember me</label>
+            <div class="relative z-10">
+
+                <p
+                    class="font-title text-white text-3xl font-semibold leading-snug mb-4"
+
+                >
+                    "Chaque petit souhait
+                    <br>
+                    devient un précieux souvenir."
+                </p>
+
+                <p class="text-white/60 text-sm">
+                    Créez la liste de naissance de votre bébé et partagez ce moment avec tous ceux qui vous sont chers.
+                </p>
+
             </div>
-        #}
 
-        <button class="btn btn-lg btn-primary" type="submit">
-            Sign in
-        </button>
-    </form>
+        </div>
+
+
+        <div
+            class="flex-1 flex flex-col justify-center items-center px-6 py-12 relative overflow-hidden"
+        >
+
+            {# Decorative elements #}
+
+            <div
+                class="pointer-events-none absolute inset-0 overflow-hidden"
+                aria-hidden="true"
+            >
+
+                <div
+                    class="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-[#FFE66D] opacity-30"
+                ></div>
+
+                <div
+                    class="absolute bottom-0 -left-12 w-48 h-48 rounded-full bg-[#4ECDC4] opacity-15"
+                ></div>
+
+                <svg
+                    class="absolute top-10 left-10 opacity-20"
+                    width="50"
+                    height="50"
+                    viewBox="0 0 50 50"
+                >
+                    <polygon
+                        points="25,3 47,47 3,47"
+                        fill="#FF6B6B"
+                    ></polygon>
+                </svg>
+
+                <div
+                    class="absolute bottom-1/4 right-6 w-16 h-16 opacity-20"
+                    style="
+                        background-image:
+                        radial-gradient(
+                            circle,
+                            rgb(199, 184, 234) 2px,
+                            transparent 2px
+                        );
+                        background-size: 9px 9px;
+                    "
+                ></div>
+
+            </div>
+
+
+            <div class="relative z-10 w-full max-w-md">
+
+                {# ================================================= #}
+                {# MOBILE LOGO                                       #}
+                {# ================================================= #}
+
+                <div
+                    class="lg:hidden flex items-center justify-center gap-2 mb-10"
+                >
+                    <a
+                        class="flex items-center gap-2"
+                        href="{{ path('app_login') }}"
+                    >
+                        <span class="text-xl">
+                            🌿
+                        </span>
+
+                        <span
+                            class="font-title text-[#2D2D2D] text-xl font-semibold"
+
+                        >
+                            myWishlist
+                        </span>
+                    </a>
+                </div>
+
+
+                {# ================================================= #}
+                {# TABS                                              #}
+                {# ================================================= #}
+
+                <div
+                    class="flex bg-white border border-[rgba(45,45,45,0.1)] rounded-2xl p-1.5 mb-8 shadow-sm"
+                    role="tablist"
+                    aria-label="Authentication"
+                >
+
+                    <button
+                        type="button"
+                        role="tab"
+                        aria-controls="login-panel"
+                        aria-selected="{{ activeTab == 'login' ? 'true' : 'false' }}"
+                        data-auth-target="tab"
+                        data-auth-view="login"
+                        data-active-class="bg-[#2D2D2D] text-white shadow-sm"
+                        data-inactive-class="text-[#6B6B6B] hover:text-[#2D2D2D]"
+                        data-action="click->auth#change"
+                        class="
+                            flex-1
+                            py-2.5
+                            text-sm
+                            font-semibold
+                            rounded-xl
+                            transition-all
+
+                            {{ activeTab == 'login'
+                        ? 'bg-[#2D2D2D] text-white shadow-sm'
+                        : 'text-[#6B6B6B] hover:text-[#2D2D2D]'
+                        }}
+                        "
+                    >
+                        Se connecter
+                    </button>
+
+
+                    <button
+                        type="button"
+                        role="tab"
+                        aria-controls="register-panel"
+                        aria-selected="{{ activeTab == 'register' ? 'true' : 'false' }}"
+                        data-auth-target="tab"
+                        data-auth-view="register"
+                        data-active-class="bg-[#2D2D2D] text-white shadow-sm"
+                        data-inactive-class="text-[#6B6B6B] hover:text-[#2D2D2D]"
+                        data-action="click->auth#change"
+                        class="
+                            flex-1
+                            py-2.5
+                            text-sm
+                            font-semibold
+                            rounded-xl
+                            transition-all
+
+                            {{ activeTab == 'register'
+                        ? 'bg-[#2D2D2D] text-white shadow-sm'
+                        : 'text-[#6B6B6B] hover:text-[#2D2D2D]'
+                        }}
+                        "
+                    >
+                        S'inscrire
+                    </button>
+
+                </div>
+
+
+                {# ================================================= #}
+                {# LOGIN                                             #}
+                {# ================================================= #}
+
+                <div
+                    id="login-panel"
+                    role="tabpanel"
+                    data-auth-target="panel"
+                    data-auth-view="login"
+                    class="{{ activeTab != 'login' ? 'hidden' : '' }}"
+                >
+
+                    <h1
+                        class="font-title text-3xl font-semibold text-[#2D2D2D] mb-1"
+                    >
+                        Welcome back
+                    </h1>
+
+                    <p class="text-[#6B6B6B] text-sm mb-8">
+                        Sign in to manage your wishlist.
+                    </p>
+
+
+                    {# Login error #}
+
+                    {% if error %}
+
+                        <div
+                            class="
+                                mb-5
+                                px-4
+                                py-3
+                                rounded-xl
+                                bg-red-50
+                                border
+                                border-red-200
+                                text-red-600
+                                text-sm
+                            "
+                        >
+                            {{ error.messageKey|trans(error.messageData, 'security') }}
+                        </div>
+
+                    {% endif %}
+
+
+                    <form
+                        method="post"
+                        action="{{ path('app_login') }}"
+                        class="flex flex-col gap-5"
+                    >
+
+                        {# Email #}
+
+                        <div>
+
+                            <label
+                                for="login_email"
+                                class="
+                                    text-xs
+                                    font-semibold
+                                    text-[#6B6B6B]
+                                    uppercase
+                                    tracking-wide
+                                    mb-1.5
+                                    block
+                                "
+                            >
+                                Email
+                            </label>
+
+                            <input
+                                id="login_email"
+                                name="_username"
+                                type="email"
+                                value="{{ last_username }}"
+                                placeholder="you@example.com"
+                                autocomplete="email"
+                                required
+                                class="
+                                    w-full
+                                    bg-white
+                                    border
+                                    border-[rgba(45,45,45,0.15)]
+                                    rounded-xl
+                                    px-4
+                                    py-3
+                                    text-sm
+                                    text-[#2D2D2D]
+                                    focus:outline-none
+                                    focus:ring-2
+                                    focus:ring-[#4ECDC4]/60
+                                    transition
+                                "
+                            >
+
+                        </div>
+
+
+                        {# Password #}
+
+                        <div>
+
+                            <div class="flex justify-between mb-1.5">
+
+                                <label
+                                    for="login_password"
+                                    class="
+                                        text-xs
+                                        font-semibold
+                                        text-[#6B6B6B]
+                                        uppercase
+                                        tracking-wide
+                                    "
+                                >
+                                    Mot de passe
+                                </label>
+
+
+                                {#
+                                Branche ici ta route de reset password
+                                quand tu l'auras.
+                                #}
+
+                                <button
+                                    type="button"
+                                    class="
+                                        text-xs
+                                        text-[#FF6B6B]
+                                        hover:underline
+                                        font-medium
+                                    "
+                                >
+                                    Mot de passe oublié ?
+                                </button>
+
+                            </div>
+
+
+                            <input
+                                id="login_password"
+                                name="_password"
+                                type="password"
+                                placeholder="••••••••"
+                                autocomplete="current-password"
+                                required
+                                class="
+                                    w-full
+                                    bg-white
+                                    border
+                                    border-[rgba(45,45,45,0.15)]
+                                    rounded-xl
+                                    px-4
+                                    py-3
+                                    text-sm
+                                    text-[#2D2D2D]
+                                    focus:outline-none
+                                    focus:ring-2
+                                    focus:ring-[#4ECDC4]/60
+                                    transition
+                                "
+                            >
+
+                        </div>
+
+
+                        {# CSRF login #}
+
+                        <input
+                            type="hidden"
+                            name="_csrf_token"
+                            value="{{ csrf_token('authenticate') }}"
+                        >
+
+
+                        <button
+                            type="submit"
+                            class="
+                                w-full
+                                bg-[#FF6B6B]
+                                text-white
+                                font-semibold
+                                py-3.5
+                                rounded-xl
+                                hover:bg-[#e85555]
+                                active:scale-[0.98]
+                                transition
+                                shadow-sm
+                                mt-1
+                            "
+                        >
+                            Se connecter
+                        </button>
+
+
+                        {# Separator #}
+
+                        <div class="relative flex items-center gap-3">
+
+                            <div
+                                class="flex-1 h-px bg-[rgba(45,45,45,0.1)]"
+                            ></div>
+
+                            <span class="text-xs text-[#6B6B6B]">
+                                ou
+                            </span>
+
+                            <div
+                                class="flex-1 h-px bg-[rgba(45,45,45,0.1)]"
+                            ></div>
+
+                        </div>
+
+
+                        {# Google button - à connecter à OAuth plus tard #}
+
+                        <button
+                            type="button"
+                            class="
+                                w-full
+                                bg-white
+                                border
+                                border-[rgba(45,45,45,0.15)]
+                                text-[#2D2D2D]
+                                font-medium
+                                py-3
+                                rounded-xl
+                                hover:bg-[#FFF0E8]
+                                transition
+                                flex
+                                items-center
+                                justify-center
+                                gap-2
+                                text-sm
+                            "
+                        >
+
+                            <svg
+                                viewBox="0 0 24 24"
+                                class="w-4 h-4"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    fill="#4285F4"
+                                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                ></path>
+
+                                <path
+                                    fill="#34A853"
+                                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                ></path>
+
+                                <path
+                                    fill="#FBBC05"
+                                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
+                                ></path>
+
+                                <path
+                                    fill="#EA4335"
+                                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                                ></path>
+                            </svg>
+
+                            Continuer avec Google
+
+                        </button>
+
+                    </form>
+
+
+                    <p class="text-xs text-center text-[#6B6B6B] mt-6">
+
+                        Pas encore inscrit ?
+
+                        <button
+                            type="button"
+                            data-auth-view="register"
+                            data-action="click->auth#change"
+                            class="
+                                text-[#FF6B6B]
+                                font-semibold
+                                hover:underline
+                            "
+                        >
+                            Inscrivez vous
+                        </button>
+
+                    </p>
+
+                </div>
+
+
+                {# ================================================= #}
+                {# REGISTER                                          #}
+                {# ================================================= #}
+
+                <div
+                    id="register-panel"
+                    role="tabpanel"
+                    data-auth-target="panel"
+                    data-auth-view="register"
+                    class="{{ activeTab != 'register' ? 'hidden' : '' }}"
+                >
+
+                    <h1
+                        class="font-title text-3xl font-semibold text-[#2D2D2D] mb-1"
+
+                    >
+                        Créer votre compte
+                    </h1>
+
+                    <p class="text-[#6B6B6B] text-sm mb-8">
+                        Préparer votre liste de naissance ou faites plaisir à vos proches.
+                    </p>
+
+
+                    {{ form_start(registrationForm, {
+                        attr: {
+                            class: 'flex flex-col gap-5'
+                        }
+                    }) }}
+
+
+                    {# ============================================= #}
+                    {# Firstname / Lastname                          #}
+                    {# ============================================= #}
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                        <div>
+
+                            {{ form_label(
+                                registrationForm.firstname,
+                                'Prénom',
+                                {
+                                    label_attr: {
+                                    class: 'text-xs font-semibold text-[#6B6B6B] uppercase tracking-wide mb-1.5 block'
+                                }
+                                }
+                            ) }}
+
+                            {{ form_widget(
+                                registrationForm.firstname,
+                                {
+                                    attr: {
+                                    class: 'w-full bg-white border border-[rgba(45,45,45,0.15)] rounded-xl px-4 py-3 text-sm text-[#2D2D2D] focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/60 transition',
+                                    placeholder: 'John'
+                                }
+                                }
+                            ) }}
+
+                            <div class="text-red-500 text-xs mt-1">
+                                {{ form_errors(registrationForm.firstname) }}
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            {{ form_label(
+                                registrationForm.lastname,
+                                'Nom',
+                                {
+                                    label_attr: {
+                                    class: 'text-xs font-semibold text-[#6B6B6B] uppercase tracking-wide mb-1.5 block'
+                                }
+                                }
+                            ) }}
+
+                            {{ form_widget(
+                                registrationForm.lastname,
+                                {
+                                    attr: {
+                                    class: 'w-full bg-white border border-[rgba(45,45,45,0.15)] rounded-xl px-4 py-3 text-sm text-[#2D2D2D] focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/60 transition',
+                                    placeholder: 'Doe'
+                                }
+                                }
+                            ) }}
+
+                            <div class="text-red-500 text-xs mt-1">
+                                {{ form_errors(registrationForm.lastname) }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    {# ============================================= #}
+                    {# Email                                         #}
+                    {# ============================================= #}
+
+                    <div>
+
+                        {{ form_label(
+                            registrationForm.email,
+                            'Email',
+                            {
+                                label_attr: {
+                                class: 'text-xs font-semibold text-[#6B6B6B] uppercase tracking-wide mb-1.5 block'
+                            }
+                            }
+                        ) }}
+
+                        {{ form_widget(
+                            registrationForm.email,
+                            {
+                                attr: {
+                                class: 'w-full bg-white border border-[rgba(45,45,45,0.15)] rounded-xl px-4 py-3 text-sm text-[#2D2D2D] focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/60 transition',
+                                placeholder: 'john.doe@exemple.com'
+                            }
+                            }
+                        ) }}
+
+                        <div class="text-red-500 text-xs mt-1">
+                            {{ form_errors(registrationForm.email) }}
+                        </div>
+
+                    </div>
+
+
+                    {# ============================================= #}
+                    {# Password                                      #}
+                    {# ============================================= #}
+
+                    <div>
+
+                        {{ form_label(
+                            registrationForm.plainPassword,
+                            'Password',
+                            {
+                                label_attr: {
+                                class: 'text-xs font-semibold text-[#6B6B6B] uppercase tracking-wide mb-1.5 block'
+                            }
+                            }
+                        ) }}
+
+                        {{ form_widget(
+                            registrationForm.plainPassword,
+                            {
+                                attr: {
+                                class: 'w-full bg-white border border-[rgba(45,45,45,0.15)] rounded-xl px-4 py-3 text-sm text-[#2D2D2D] focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/60 transition',
+                                placeholder: '••••••••'
+                            }
+                            }
+                        ) }}
+
+                        <div class="text-red-500 text-xs mt-1">
+                            {{ form_errors(registrationForm.plainPassword) }}
+                        </div>
+
+                        <p class="text-[11px] text-[#6B6B6B] mt-1.5">
+                            Au moins 6 caractères.
+                        </p>
+
+                    </div>
+
+
+                    {# ============================================= #}
+                    {# Terms                                         #}
+                    {# ============================================= #}
+
+                    <div>
+
+                        <div class="flex items-start gap-3">
+
+                            {{ form_widget(
+                                registrationForm.agreeTerms,
+                                {
+                                    attr: {
+                                    class: 'mt-0.5 w-4 h-4 rounded border-[rgba(45,45,45,0.2)] text-[#FF6B6B] focus:ring-[#4ECDC4]'
+                                }
+                                }
+                            ) }}
+
+                            <div>
+
+                                {{ form_label(
+                                    registrationForm.agreeTerms,
+                                    'J\'accepte les termes et les conditions d\'utilisation.',
+                                    {
+                                        label_attr: {
+                                        class: 'text-xs text-[#6B6B6B] cursor-pointer'
+                                    }
+                                    }
+                                ) }}
+
+                                <div class="text-red-500 text-xs mt-1">
+                                    {{ form_errors(registrationForm.agreeTerms) }}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    {# ============================================= #}
+                    {# Submit                                        #}
+                    {# ============================================= #}
+
+                    <button
+                        type="submit"
+                        class="
+                                w-full
+                                bg-[#FF6B6B]
+                                text-white
+                                font-semibold
+                                py-3.5
+                                rounded-xl
+                                hover:bg-[#e85555]
+                                active:scale-[0.98]
+                                transition
+                                shadow-sm
+                                mt-1
+                            "
+                    >
+                        Créer un compte
+                    </button>
+
+
+                    {{ form_end(registrationForm) }}
+
+
+                    <p class="text-xs text-center text-[#6B6B6B] mt-6">
+
+                        Déjà inscrit ?
+
+                        <button
+                            type="button"
+                            data-auth-view="login"
+                            data-action="click->auth#change"
+                            class="
+                                text-[#FF6B6B]
+                                font-semibold
+                                hover:underline
+                            "
+                        >
+                            Se connecter
+                        </button>
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
 {% endblock %}

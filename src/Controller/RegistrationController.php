@@ -11,33 +11,60 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class RegistrationController extends AbstractController
 {
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, EntityManagerInterface $entityManager): Response
-    {
+    public function register(
+        Request $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        Security $security,
+        EntityManagerInterface $entityManager,
+        AuthenticationUtils $authenticationUtils,
+    ): Response {
         $user = new User();
-        $form = $this->createForm(RegistrationFormType::class, $user);
+
+        $form = $this->createForm(
+            RegistrationFormType::class,
+            $user,
+            [
+                'action' => $this->generateUrl('app_register'),
+            ]
+        );
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var string $plainPassword */
-            $plainPassword = $form->get('plainPassword')->getData();
 
-            // encode the plain password
-            $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
+            $user->setPassword(
+                $userPasswordHasher->hashPassword(
+                    $user,
+                    $form->get('plainPassword')->getData()
+                )
+            );
 
             $entityManager->persist($user);
             $entityManager->flush();
 
-            // do anything else you need here, like send an email
-
-            return $security->login($user, 'form_login', 'main');
+            /*
+             * Connexion automatique.
+             *
+             * Comme le target_path est dans la session,
+             * Symfony redirigera vers la page d'origine.
+             */
+            return $security->login(
+                $user,
+                'form_login',
+                'main'
+            );
         }
 
-        return $this->render('registration/register.html.twig', [
+        return $this->render('security/login.html.twig', [
             'registrationForm' => $form,
+            'last_username' => $authenticationUtils->getLastUsername(),
+            'error' => null,
+            'active_tab' => 'register',
         ]);
     }
 }

@@ -1,5 +1,19 @@
 <nav class="relative z-20 flex items-center justify-between px-8 py-5 max-w-6xl mx-auto">
     <div class="flex items-center gap-2"><span class="text-xl">🌿</span><span class="font-title text-lg font-semibold text-[#2D2D2D]">MyWishlist</span></div>
-    <div class="flex items-center gap-4"><a class="text-sm font-medium text-[#6B6B6B] hover:text-[#2D2D2D] transition" href="/auth?tab=login" data-discover="true">Se connecter</a><a class="text-sm font-semibold bg-[#2D2D2D] text-white px-5 py-2 rounded-full hover:bg-[#444] active:scale-95 transition"
-                                                                                                                                                                                 href="/auth?tab=register" data-discover="true">S'inscrire</a></div>
+    <div class="flex items-center gap-4">
+        <a
+            class="text-sm font-medium text-[#6B6B6B] hover:text-[#2D2D2D] transition"
+            href="{{ path('app_login', {redirect: app.request.requestUri}) }}"
+            data-discover="true">
+            Se connecter
+        </a>
+        <a
+            class="text-sm font-semibold bg-[#2D2D2D] text-white px-5 py-2 rounded-full hover:bg-[#444] active:scale-95 transition"
+            href="{{ path('app_login', {
+                    redirect: app.request.requestUri,
+                    tab: 'register'
+            }) }}"
+            data-discover="true">S'inscrire
+        </a>
+    </div>
 </nav>
