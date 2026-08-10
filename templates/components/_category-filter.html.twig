@@ -1,0 +1,35 @@
+{% set categories = {
+    'meal' : 'Repas',
+    'hygiene' : 'Hygiène',
+    'awakening' : 'Éveil',
+    'clothing' : 'Vêtement',
+    'travel' : 'Voyage',
+    'bedroom' : 'Chambre'
+} %}
+<div class="inline-flex flex-wrap gap-2">
+    <button
+        data-filter-category="all"
+        class="text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all
+        bg-[#2D2D2D] text-white border-[#2D2D2D] hover:border-[#2D2D2D]"
+    >
+        Tout
+    </button>
+    {% for key, value in categories %}
+        <button
+            data-filter-category="{{ key }}"
+            class="text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all
+        bg-white text-[#6B6B6B] border-[rgba(45,45,45,0.15)] hover:border-[#2D2D2D]"
+        >
+            {{ value }}
+        </button>
+    {% endfor %}
+
+    <label class="flex items-center gap-2">
+        <input
+            type="checkbox"
+            data-available-filter
+        >
+        Seulement disponibles
+    </label>
+</div>
+

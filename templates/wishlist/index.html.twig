@@ -43,8 +43,11 @@
             </div>
         </div>
     </header>
+<div data-controller="category-filter">
+    <div class="flex items-center justify-between flex-wrap gap-3 max-w-5xl mx-auto px-6 py-6">
 
-    <div class="max-w-5xl mx-auto px-6 py-6">
+        {% include 'components/_category-filter.html.twig' %}
+
         <div class="flex flex-wrap items-center gap-3 justify-between">
             {% if isOwner %}
             <div
@@ -92,5 +95,5 @@
             {% endfor %}
         </div>
     </main>
-
+</div>
 {% endblock %}
