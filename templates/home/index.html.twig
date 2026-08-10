@@ -1,0 +1,120 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ controller_name }}{% endblock %}
+
+{% block body %}
+    <div class="min-h-screen bg-[#FFF8F0]" style="font-family: Outfit, system-ui, sans-serif;">
+        {% include 'components/_navbar.html.twig' %}
+        <section class="relative overflow-hidden pt-12 pb-24 px-6">
+            <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+                <div class="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-[#FFE66D] opacity-25"></div>
+                <div class="absolute top-1/3 -left-12 w-48 h-48 rounded-full bg-[#4ECDC4] opacity-15"></div>
+                <svg class="absolute top-8 left-1/4 opacity-20" width="60" height="60" viewBox="0 0 60 60">
+                    <polygon points="30,3 57,57 3,57" fill="#FF6B6B"></polygon>
+                </svg>
+                <div class="absolute bottom-0 right-1/4 w-32 h-32 rounded-full bg-[#C7B8EA] opacity-30"></div>
+                <div class="absolute top-2/3 right-8 w-20 h-20 opacity-15" style="background-image: radial-gradient(circle, rgb(255, 107, 107) 2px, transparent 2px); background-size: 10px 10px;"></div>
+            </div>
+            <div class="relative z-10 max-w-5xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div class="inline-flex items-center gap-2 bg-white border border-[rgba(45,45,45,0.1)] rounded-full px-4 py-1.5 text-xs font-medium text-[#6B6B6B] mb-6 shadow-sm"><span>✨</span> La liste de souhaits pour votre famille qui s'agrandit</div>
+                    <h1 class="text-5xl sm:text-6xl font-semibold text-[#2D2D2D] leading-[1.1] mb-6" style="font-family: Fraunces, Georgia, serif;">Accueillez votre<br>bébé avec <em class="not-italic text-[#FF6B6B]">joie</em></h1>
+                    <p class="text-[#6B6B6B] text-lg leading-relaxed mb-8 max-w-md">Créez une magnifique liste de souhaits pour votre nouveau-né. Partagez-la avec votre famille et vos amis, et laissez-les vous offrir exactement ce dont vous avez besoin.</p>
+                    <div class="flex flex-wrap gap-3"><a class="bg-[#FF6B6B] text-white font-semibold px-8 py-3.5 rounded-full hover:bg-[#e85555] active:scale-95 transition shadow-md" href="/auth?tab=register" data-discover="true">Créer ma wishlist</a><a class="bg-white border border-[rgba(45,45,45,0.15)] text-[#2D2D2D] font-medium px-8 py-3.5 rounded-full hover:bg-[#FFF0E8] transition"
+                                                                                                                                                                                                                                                                href="/wishlist" data-discover="true">Voir un exemple →</a></div>
+                    <div class="flex items-center gap-3 mt-8">
+                        <div class="flex -space-x-2">
+                            <div class="w-8 h-8 rounded-full bg-white border-2 border-[#FFF8F0] flex items-center justify-center text-sm shadow-sm">👩</div>
+                            <div class="w-8 h-8 rounded-full bg-white border-2 border-[#FFF8F0] flex items-center justify-center text-sm shadow-sm">👨</div>
+                            <div class="w-8 h-8 rounded-full bg-white border-2 border-[#FFF8F0] flex items-center justify-center text-sm shadow-sm">👩🏽</div>
+                            <div class="w-8 h-8 rounded-full bg-white border-2 border-[#FFF8F0] flex items-center justify-center text-sm shadow-sm">👨🏻</div>
+                            <div class="w-8 h-8 rounded-full bg-white border-2 border-[#FFF8F0] flex items-center justify-center text-sm shadow-sm">👩🏾</div>
+                        </div>
+                        <p class="text-xs text-[#6B6B6B]">Pensé pour les futurs parents et leurs proches.</p>
+                    </div>
+                </div>
+                <div class="relative hidden lg:block">
+                    <div class="relative w-full aspect-square max-w-sm mx-auto">
+                        <div class="absolute inset-4 rounded-3xl overflow-hidden shadow-2xl"><img alt="Adult hand holding tiny baby hand" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1582486225644-aeacf6aa0b1b?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;w=600&amp;q=80"></div>
+                        <div class="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-xl px-4 py-3 flex items-center gap-3 border border-[rgba(45,45,45,0.06)]"><span class="text-2xl">🎀</span>
+                            <div>
+                                <p class="text-xs font-semibold text-[#2D2D2D]">Offert par Mamie</p>
+                                <p class="text-[10px] text-[#6B6B6B]">Arche d'éveil en bois</p>
+                            </div>
+                        </div>
+                        <div class="absolute -top-2 -right-2 bg-[#FFE66D] rounded-xl shadow-md px-3 py-2 text-center">
+                            <p class="text-xl font-semibold text-[#2D2D2D]" style="font-family: Fraunces, Georgia, serif;">8</p>
+                            <p class="text-[10px] font-medium text-[#6B6B6B]">wishes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="bg-white py-20 px-6">
+            <div class="max-w-5xl mx-auto">
+                <div class="text-center mb-14">
+                    <h2 class="text-4xl font-semibold text-[#2D2D2D] mb-3" style="font-family: Fraunces, Georgia, serif;">Tout ce dont vous avez besoin</h2>
+                    <p class="text-[#6B6B6B] text-lg">Simple, pratique et élégant.</p>
+                </div>
+                <div class="grid sm:grid-cols-3 gap-8">
+                    <div class="group p-8 rounded-3xl border border-[rgba(45,45,45,0.08)] hover:shadow-lg hover:border-[rgba(45,45,45,0.12)] transition-all bg-[#FFF8F0]">
+                        <div class="text-4xl mb-5">🎁</div>
+                        <h3 class="text-xl font-semibold text-[#2D2D2D] mb-2" style="font-family: Fraunces, Georgia, serif;">Créez votre liste idéale</h3>
+                        <p class="text-[#6B6B6B] text-sm leading-relaxed">Classez vos envies par catégorie et par priorité pour que vos proches sachent exactement ce qui vous ferait le plus plaisir.</p>
+                    </div>
+                    <div class="group p-8 rounded-3xl border border-[rgba(45,45,45,0.08)] hover:shadow-lg hover:border-[rgba(45,45,45,0.12)] transition-all bg-[#FFF8F0]">
+                        <div class="text-4xl mb-5">🎀</div>
+                        <h3 class="text-xl font-semibold text-[#2D2D2D] mb-2" style="font-family: Fraunces, Georgia, serif;">Chacun choisit son cadeau</h3>
+                        <p class="text-[#6B6B6B] text-sm leading-relaxed">Vos proches indiquent ce qu’ils souhaitent offrir : pas de doublons, pas de messages gênants, tout est clair.</p>
+                    </div>
+                    <div class="group p-8 rounded-3xl border border-[rgba(45,45,45,0.08)] hover:shadow-lg hover:border-[rgba(45,45,45,0.12)] transition-all bg-[#FFF8F0]">
+                        <div class="text-4xl mb-5">🌿</div>
+                        <h3 class="text-xl font-semibold text-[#2D2D2D] mb-2" style="font-family: Fraunces, Georgia, serif;">Partagez en un seul lien</h3>
+                        <p class="text-[#6B6B6B] text-sm leading-relaxed">Envoyez simplement votre wishlist à vos proches. Un lien suffit pour consulter la liste et choisir un cadeau.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="overflow-hidden h-56 flex">
+            <div class="flex-1 min-w-0 overflow-hidden"><img alt="" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1552819289-824d37ca69d2?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;w=400&amp;q=80"></div>
+            <div class="flex-1 min-w-0 overflow-hidden"><img alt="" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1593793373220-2e51e1c31385?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;w=400&amp;q=80"></div>
+            <div class="flex-1 min-w-0 overflow-hidden"><img alt="" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1510154221590-ff63e90a136f?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;w=400&amp;q=80"></div>
+            <div class="flex-1 min-w-0 overflow-hidden"><img alt="" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1617331140180-e8262094733a?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;w=400&amp;q=80"></div>
+            <div class="flex-1 min-w-0 overflow-hidden"><img alt="" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1774578342155-8d7e44a18bfd?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;w=400&amp;q=80"></div>
+        </div>
+{#        <section class="py-20 px-6 bg-[#FFF8F0]">#}
+{#            <div class="max-w-5xl mx-auto">#}
+{#                <h2 class="text-4xl font-semibold text-[#2D2D2D] text-center mb-12" style="font-family: Fraunces, Georgia, serif;">Loved by families</h2>#}
+{#                <div class="grid sm:grid-cols-3 gap-6">#}
+{#                    <div class="bg-white rounded-3xl p-7 border border-[rgba(45,45,45,0.07)] shadow-sm">#}
+{#                        <p class="text-[#2D2D2D] text-sm leading-relaxed mb-5">"We used this for our baby shower and it was a game-changer. Everyone knew exactly what to get!"</p>#}
+{#                        <div class="flex items-center gap-3">#}
+{#                            <div class="w-9 h-9 rounded-full bg-[#FFF0E8] flex items-center justify-center text-lg">👩</div><span class="text-sm font-semibold text-[#2D2D2D]">Sophie M.</span></div>#}
+{#                    </div>#}
+{#                    <div class="bg-white rounded-3xl p-7 border border-[rgba(45,45,45,0.07)] shadow-sm">#}
+{#                        <p class="text-[#2D2D2D] text-sm leading-relaxed mb-5">"Finally a wishlist that doesn't look like a spreadsheet. The whole experience felt special."</p>#}
+{#                        <div class="flex items-center gap-3">#}
+{#                            <div class="w-9 h-9 rounded-full bg-[#FFF0E8] flex items-center justify-center text-lg">👨‍👩‍👧</div><span class="text-sm font-semibold text-[#2D2D2D]">James &amp; Lila</span></div>#}
+{#                    </div>#}
+{#                    <div class="bg-white rounded-3xl p-7 border border-[rgba(45,45,45,0.07)] shadow-sm">#}
+{#                        <p class="text-[#2D2D2D] text-sm leading-relaxed mb-5">"Loved how our guests could claim gifts without creating an account. So thoughtful."</p>#}
+{#                        <div class="flex items-center gap-3">#}
+{#                            <div class="w-9 h-9 rounded-full bg-[#FFF0E8] flex items-center justify-center text-lg">👩🏽</div><span class="text-sm font-semibold text-[#2D2D2D]">Priya T.</span></div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#        </section>#}
+        <section class="relative overflow-hidden bg-[#2D2D2D] py-20 px-6 text-center">
+            <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+                <div class="absolute -top-16 -left-16 w-64 h-64 rounded-full bg-[#FF6B6B] opacity-10"></div>
+                <div class="absolute -bottom-16 -right-16 w-64 h-64 rounded-full bg-[#4ECDC4] opacity-10"></div>
+            </div>
+            <div class="relative z-10 max-w-xl mx-auto">
+                <h2 class="text-4xl font-semibold text-white mb-4" style="font-family: Fraunces, Georgia, serif;">Prêt à créer votre wishlist ?</h2>
+                <p class="text-white/60 text-lg mb-8">Créez la liste de naissance de votre bébé en moins d'une minute.</p><a class="inline-block bg-[#FF6B6B] text-white font-semibold px-10 py-4 rounded-full hover:bg-[#e85555] active:scale-95 transition shadow-lg text-lg" href="/auth?tab=register" data-discover="true">Créer ma wishlist — c’est gratuit</a></div>
+        </section>
+        <footer class="bg-[#2D2D2D] border-t border-white/10 py-8 text-center text-xs text-white/30">
+            <p>Made with ❤️ for growing families · by <a href="https://guillaume-gorvel.fr">Guillaume Gorvel</a> © 2026</p>
+        </footer>
+    </div>
+{% endblock %}

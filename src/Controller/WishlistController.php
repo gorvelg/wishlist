@@ -17,7 +17,7 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 
 final class WishlistController extends AbstractController
 {
-    #[Route('/wishlist/{token}', name: 'app_home')]
+    #[Route('/wishlist/{token}', name: 'app_wishlist')]
     public function index(
         string $token,
         Request $request,
@@ -78,7 +78,7 @@ final class WishlistController extends AbstractController
                 $em->persist($product);
                 $em->flush();
 
-                return $this->redirectToRoute('app_home', [
+                return $this->redirectToRoute('app_wishlist', [
                     'token' => $wishlist->getAccessToken(),
                 ]);
             }
@@ -152,7 +152,7 @@ final class WishlistController extends AbstractController
                 'Votre réservation a été annulée.'
             );
 
-            return $this->redirectToRoute('app_home', [
+            return $this->redirectToRoute('app_wishlist', [
                 'token' => $token,
             ]);
         }
@@ -164,7 +164,7 @@ final class WishlistController extends AbstractController
                 'Ce produit a déjà été offert.'
             );
 
-            return $this->redirectToRoute('app_home', [
+            return $this->redirectToRoute('app_wishlist', [
                 'token' => $token,
             ]);
         }
@@ -185,7 +185,7 @@ final class WishlistController extends AbstractController
             'Le cadeau a bien été réservé.'
         );
 
-        return $this->redirectToRoute('app_home', [
+        return $this->redirectToRoute('app_wishlist', [
             'token' => $token,
         ]);
     }
