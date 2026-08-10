@@ -135,9 +135,21 @@ final class WishlistController extends AbstractController
             ]);
 
         if ($existingProductUser !== null) {
+            $product->removeProductUser($existingProductUser);
+
+            $em->remove($existingProductUser);
+
+            if ($product->getProductUsers()->isEmpty()) {
+                $product->setStatus(ProductStatus::AVAILABLE);
+            } else {
+                $product->setStatus(ProductStatus::BUYING);
+            }
+
+            $em->flush();
+
             $this->addFlash(
-                'error',
-                'Vous avez déjà réservé ce produit.'
+                'success',
+                'Votre réservation a été annulée.'
             );
 
             return $this->redirectToRoute('app_home', [

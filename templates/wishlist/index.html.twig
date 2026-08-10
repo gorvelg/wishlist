@@ -69,6 +69,12 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {% for product in products %}
 
+                {% set hasReserved = app.user
+                    and (product.productUsers|filter(
+                    productUser => productUser.user.id == app.user.id
+                )|length > 0)
+                %}
+
                 {% include 'components/_product-card.html.twig' with {
                     productId: product.id,
                     name: product.name,
@@ -79,7 +85,8 @@
                     url: product.url,
                     category: product.category,
                     wishlistToken: wishlist.accessToken,
-                    productUsers: product.productUsers
+                    productUsers: product.productUsers,
+                    hasReserved: hasReserved
                 } only %}
 
             {% endfor %}
