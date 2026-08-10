@@ -34,7 +34,9 @@ final class WishlistController extends AbstractController
         $user = $this->getUser();
 
         $isOwner = $user !== null
-            && $wishlist->getWishlistOwners()->contains($user);
+            && $wishlist->getWishlistOwners()->exists(
+                fn ($key, $wishlistOwner) => $wishlistOwner->getUser() === $user
+            );
 
         $form = null;
 
@@ -95,8 +97,6 @@ final class WishlistController extends AbstractController
         }
 
         $remainingProducts = $countProducts - $giftedProducts;
-
-
 
         return $this->render('wishlist/index.html.twig', [
             'wishlist' => $wishlist,
