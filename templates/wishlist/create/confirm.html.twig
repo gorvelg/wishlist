@@ -6,151 +6,467 @@
 
 {% block body %}
 
-    <div class="min-h-screen bg-[#FFF8F0] px-6 py-12">
+    <div
+        class="min-h-screen bg-[#FFF8F0] flex flex-col"
+        style="font-family: Outfit, system-ui, sans-serif"
+    >
 
-        <div class="max-w-xl mx-auto">
+        {# ===================================================== #}
+        {# HEADER                                                #}
+        {# ===================================================== #}
 
-            {% include 'wishlist/create/_progress.html.twig' %}
-
-
-            <h1 class="text-3xl font-semibold mb-2">
-                Tout est prêt ✨
-            </h1>
-
-            <p class="text-[#6B6B6B] mb-8">
-                Vérifiez les informations avant de créer
-                votre liste.
-            </p>
+        {% include 'components/_navbar-simple.html.twig' %}
 
 
-            <div
-                class="
-                    bg-white
-                    border
-                    border-[rgba(45,45,45,0.1)]
-                    rounded-2xl
-                    p-6
-                    space-y-5
-                "
-            >
+        {# ===================================================== #}
+        {# CONTENT                                               #}
+        {# ===================================================== #}
 
-                <div>
-                    <p class="text-xs text-[#6B6B6B]">
-                        Nom de la liste
-                    </p>
+        <div
+            class="
+                flex-1
+                flex
+                flex-col
+                items-center
+                justify-center
+                px-6
+                py-12
+            "
+        >
 
-                    <p class="font-semibold">
-                        {{ data.name }}
-                    </p>
-                </div>
+            <div class="w-full max-w-xl">
 
 
-                <div>
-                    <p class="text-xs text-[#6B6B6B]">
-                        Parents
-                    </p>
+                {# ================================================= #}
+                {# PROGRESS                                          #}
+                {# ================================================= #}
 
-                    <p class="font-semibold">
-                        {{ data.parentsNames }}
-                    </p>
-                </div>
-
-
-                {% if data.babyName %}
-
-                    <div>
-                        <p class="text-xs text-[#6B6B6B]">
-                            Prénom du bébé
-                        </p>
-
-                        <p class="font-semibold">
-                            {{ data.babyName }}
-                        </p>
-                    </div>
-
-                {% else %}
-
-                    <div>
-                        <p class="text-xs text-[#6B6B6B]">
-                            Bébé
-                        </p>
-
-                        <p class="font-semibold">
-                            Notre futur bébé 🌿
-                        </p>
-                    </div>
-
-                {% endif %}
-
-
-                <div>
-                    <p class="text-xs text-[#6B6B6B]">
-                        Arrivée prévue
-                    </p>
-
-                    <p class="font-semibold">
-                        {{ data.dueDate|date('d/m/Y') }}
-                    </p>
-                </div>
-
-
-                {% if data.visitorMessage %}
-
-                    <div>
-                        <p class="text-xs text-[#6B6B6B] mb-1">
-                            Message pour vos proches
-                        </p>
-
-                        <p class="text-sm">
-                            {{ data.visitorMessage }}
-                        </p>
-                    </div>
-
-                {% endif %}
-
-            </div>
-
-
-            {{ form_start(form) }}
-
-            <div
-                class="
-                        flex
-                        justify-between
-                        items-center
-                        mt-8
-                    "
-            >
-
-                <a
-                    href="{{ path(
-                        'app_wishlist_create',
-                        {
-                            step: 'baby'
-                        }
-                    ) }}"
-                >
-                    ← Modifier
-                </a>
-
-
-                <button
-                    type="submit"
+                <div
                     class="
-                            bg-[#FF6B6B]
-                            text-white
-                            font-semibold
-                            px-6
-                            py-3
-                            rounded-xl
-                        "
+                        flex
+                        items-center
+                        justify-center
+                        mb-10
+                    "
                 >
-                    Créer ma liste
-                </button>
+
+                    {# Étape 1 terminée #}
+
+                    <div class="flex items-center gap-2">
+
+                        <div
+                            class="
+                                w-8
+                                h-8
+                                rounded-full
+                                flex
+                                items-center
+                                justify-center
+                                text-xs
+                                font-bold
+                                bg-[#FF6B6B]
+                                text-white
+                            "
+                        >
+                            ✓
+                        </div>
+
+                        <div
+                            class="w-12 h-0.5 bg-[#FF6B6B]"
+                        ></div>
+
+                    </div>
+
+
+                    {# Étape 2 terminée #}
+
+                    <div class="flex items-center gap-2">
+
+                        <div
+                            class="
+                                w-8
+                                h-8
+                                rounded-full
+                                flex
+                                items-center
+                                justify-center
+                                text-xs
+                                font-bold
+                                bg-[#FF6B6B]
+                                text-white
+                            "
+                        >
+                            ✓
+                        </div>
+
+                        <div
+                            class="w-12 h-0.5 bg-[#FF6B6B]"
+                        ></div>
+
+                    </div>
+
+
+                    {# Étape 3 active #}
+
+                    <div class="flex items-center gap-2">
+
+                        <div
+                            class="
+                                w-8
+                                h-8
+                                rounded-full
+                                flex
+                                items-center
+                                justify-center
+                                text-xs
+                                font-bold
+                                bg-[#FF6B6B]
+                                text-white
+                            "
+                        >
+                            3
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                {# ================================================= #}
+                {# CARD                                              #}
+                {# ================================================= #}
+
+                <div
+                    class="
+                        bg-white
+                        rounded-3xl
+                        border
+                        border-[rgba(45,45,45,0.08)]
+                        shadow-sm
+                        p-8
+                    "
+                >
+
+                    {# ============================================= #}
+                    {# TITLE                                         #}
+                    {# ============================================= #}
+
+                    <div class="mb-7">
+
+                        <p
+                            class="
+                                text-xs
+                                font-semibold
+                                text-[#FF6B6B]
+                                uppercase
+                                tracking-widest
+                                mb-1
+                            "
+                        >
+                            Étape 3 sur 3
+                        </p>
+
+
+                        <h1
+                            class="
+                                text-3xl
+                                font-semibold
+                                text-[#2D2D2D]
+                            "
+                            style="font-family: Fraunces, Georgia, serif"
+                        >
+                            Tout est prêt ✨
+                        </h1>
+
+
+                        <p
+                            class="
+                                text-[#6B6B6B]
+                                text-sm
+                                mt-1
+                            "
+                        >
+                            Vérifiez les informations avant de créer votre liste.
+                        </p>
+
+                    </div>
+
+
+                    {# ============================================= #}
+                    {# RÉCAPITULATIF                                 #}
+                    {# ============================================= #}
+
+                    <div
+                        class="
+                            bg-[#FFF8F0]
+                            border
+                            border-[rgba(45,45,45,0.08)]
+                            rounded-2xl
+                            p-5
+                            flex
+                            flex-col
+                            gap-5
+                        "
+                    >
+
+                        {# ========================================= #}
+                        {# NOM DE LA LISTE                           #}
+                        {# ========================================= #}
+
+                        <div>
+
+                            <p
+                                class="
+                                    text-xs
+                                    font-semibold
+                                    text-[#6B6B6B]
+                                    uppercase
+                                    tracking-wide
+                                    mb-1
+                                "
+                            >
+                                Titre de la liste
+                            </p>
+
+                            <p
+                                class="
+                                    text-sm
+                                    font-semibold
+                                    text-[#2D2D2D]
+                                "
+                            >
+                                {{ data.name }}
+                            </p>
+
+                        </div>
+
+
+                        {# ========================================= #}
+                        {# PARENTS                                   #}
+                        {# ========================================= #}
+
+                        <div>
+
+                            <p
+                                class="
+                                    text-xs
+                                    font-semibold
+                                    text-[#6B6B6B]
+                                    uppercase
+                                    tracking-wide
+                                    mb-1
+                                "
+                            >
+                                Parent(s)
+                            </p>
+
+                            <p
+                                class="
+                                    text-sm
+                                    font-semibold
+                                    text-[#2D2D2D]
+                                "
+                            >
+                                {{ data.parentsNames }}
+                            </p>
+
+                        </div>
+
+
+                        {# ========================================= #}
+                        {# BÉBÉ                                      #}
+                        {# ========================================= #}
+
+                        <div>
+
+                            <p
+                                class="
+                                    text-xs
+                                    font-semibold
+                                    text-[#6B6B6B]
+                                    uppercase
+                                    tracking-wide
+                                    mb-1
+                                "
+                            >
+                                Prénom du bébé
+                            </p>
+
+
+                            <p
+                                class="
+                                    text-sm
+                                    font-semibold
+                                    text-[#2D2D2D]
+                                "
+                            >
+
+                                {% if data.babyName %}
+
+                                    {{ data.babyName }}
+
+                                {% else %}
+
+                                    <span
+                                        class="
+                                            text-[#6B6B6B]
+                                            font-normal
+                                        "
+                                    >
+                                        Pas encore renseigné
+                                    </span>
+
+                                {% endif %}
+
+                            </p>
+
+                        </div>
+
+
+                        {# ========================================= #}
+                        {# DATE                                      #}
+                        {# ========================================= #}
+
+                        <div>
+
+                            <p
+                                class="
+                                    text-xs
+                                    font-semibold
+                                    text-[#6B6B6B]
+                                    uppercase
+                                    tracking-wide
+                                    mb-1
+                                "
+                            >
+                                Date prévue d’arrivée
+                            </p>
+
+                            <p
+                                class="
+                                    text-sm
+                                    font-semibold
+                                    text-[#2D2D2D]
+                                "
+                            >
+                                {{ data.dueDate|date('d/m/Y') }}
+                            </p>
+
+                        </div>
+
+
+                        {# ========================================= #}
+                        {# MESSAGE                                   #}
+                        {# ========================================= #}
+
+                        {% if data.message %}
+
+                            <div>
+
+                                <p
+                                    class="
+                                        text-xs
+                                        font-semibold
+                                        text-[#6B6B6B]
+                                        uppercase
+                                        tracking-wide
+                                        mb-1
+                                    "
+                                >
+                                    Message pour vos proches
+                                </p>
+
+
+                                <p
+                                    class="
+                                        text-sm
+                                        text-[#2D2D2D]
+                                        leading-relaxed
+                                        whitespace-pre-line
+                                    "
+                                >
+                                    {{ data.message }}
+                                </p>
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    {# ============================================= #}
+                    {# CONFIRM FORM                                  #}
+                    {# ============================================= #}
+
+                    {{ form_start(form) }}
+
+                    <div
+                        class="
+                                flex
+                                items-center
+                                gap-3
+                                mt-7
+                            "
+                    >
+
+                        {# ===================================== #}
+                        {# RETOUR                                #}
+                        {# ===================================== #}
+
+                        <a
+                            href="{{ path(
+                                'app_wishlist_create',
+                                {
+                                    step: 'baby'
+                                }
+                            ) }}"
+                            class="
+                                    flex-1
+                                    text-center
+                                    bg-white
+                                    border
+                                    border-[rgba(45,45,45,0.12)]
+                                    text-[#2D2D2D]
+                                    font-semibold
+                                    py-3.5
+                                    rounded-xl
+                                    hover:bg-[#FFF8F0]
+                                    transition
+                                "
+                        >
+                            ← Modifier
+                        </a>
+
+
+                        {# ===================================== #}
+                        {# CREATE                                #}
+                        {# ===================================== #}
+
+                        <button
+                            type="submit"
+                            class="
+                                    flex-1
+                                    bg-[#FF6B6B]
+                                    text-white
+                                    font-semibold
+                                    py-3.5
+                                    rounded-xl
+                                    hover:bg-[#e85555]
+                                    active:scale-[0.98]
+                                    transition
+                                "
+                        >
+                            Créer ma liste
+                        </button>
+
+                    </div>
+
+                    {{ form_end(form) }}
+
+                </div>
 
             </div>
-
-            {{ form_end(form) }}
 
         </div>
 

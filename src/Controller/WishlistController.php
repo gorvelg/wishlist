@@ -584,20 +584,12 @@ final class WishlistController extends AbstractController
             );
         }
 
-        /*
-         * Vérifie que l'utilisateur avait bien
-         * participé au cadeau.
-         *
-         * ATTENTION :
-         * garde ici le vrai nom de ta propriété Doctrine.
-         *
-         * Si chez toi c'est "User", utilise "User".
-         */
+   
         $productUser = $em
             ->getRepository(ProductUser::class)
             ->findOneBy([
                 'product' => $product,
-                'User' => $user,
+                'user' => $user,
             ]);
 
         /*

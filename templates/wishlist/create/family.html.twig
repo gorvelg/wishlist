@@ -15,35 +15,7 @@
         {# HEADER                                                #}
         {# ===================================================== #}
 
-        <header
-            class="flex items-center justify-between px-8 py-5 border-b border-[rgba(45,45,45,0.07)] bg-white"
-        >
-
-            <a
-                class="flex items-center gap-2"
-                href="/"
-            >
-                <span class="text-xl">
-                    🌿
-                </span>
-
-                <span
-                    class="text-lg font-semibold text-[#2D2D2D]"
-                    style="font-family: Fraunces, Georgia, serif"
-                >
-                    Wren
-                </span>
-            </a>
-
-
-            <a
-                class="text-sm text-[#6B6B6B] hover:text-[#2D2D2D] transition"
-                href="/dashboard"
-            >
-                Annuler
-            </a>
-
-        </header>
+        {% include 'components/_navbar-simple.html.twig' %}
 
 
         {# ===================================================== #}

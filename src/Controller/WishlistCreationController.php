@@ -25,7 +25,7 @@ final class WishlistCreationController extends AbstractController
         '/wishlist/create/{step}',
         name: 'app_wishlist_create',
         requirements: [
-            'step' => 'family|baby|message',
+            'step' => 'family|baby|confirm',
         ]
     )]
     public function create(
