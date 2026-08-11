@@ -1,39 +1,105 @@
 {% if isOwner %}
-<dialog
-    data-modal-target="dialog"
-    class="
-        w-[500px] max-w-[90vw] fixed rounded-2xl p-6 backdrop:bg-black/30 backdrop:backdrop-blur-sm top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-    "
->
+    <dialog
+        data-modal-target="dialog"
+        class="w-[500px] max-w-[90vw] fixed rounded-2xl p-6 backdrop:bg-black/30 backdrop:backdrop-blur-sm top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+    >
         <div class="absolute top-0 right-0 w-24 h-24 rounded-bl-full bg-[#FFE66D] opacity-30"></div>
 
+        <div class="flex items-center justify-between mb-6">
+            <button
+                type="button"
+                data-action="click->modal#close"
+            >
+                ✕
+            </button>
+        </div>
 
-            <div class="flex items-center justify-between mb-6">
-                <button
-                    type="button"
-                    data-action="click->modal#close"
-                >
-                    ✕
-                </button>
-            </div>
+        <h2 class="font-display text-2xl font-semibold text-[#2D2D2D] mb-6">
+            Ajouter un souhait
+        </h2>
 
-            <h2 class="font-display text-2xl font-semibold text-[#2D2D2D] mb-6">Ajouter un souhait</h2>
+        {# ====================================================== #}
+        {# 1. PETIT FORMULAIRE D'IMPORT                           #}
+        {# ====================================================== #}
+        <form
+            method="post"
+            action="{{ path('app_wishlist', { token: wishlist.accessToken }) }}"
+            class="flex gap-2 mb-6"
+            data-turbo="false"
+        >
+            <input
+                type="url"
+                name="product_url"
+                value="{{ form.vars.data.url ?? '' }}"
+                placeholder="https://www.exemple.com/produit"
+                required
+                class="flex-1 min-w-0 rounded-xl border border-[rgba(45,45,45,0.15)] px-4 py-2.5 text-[#2D2D2D] text-sm focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/60 transition"
+            >
 
-            <div>
-                {{ form_start(form,{
-                    attr: {
-                        'data-turbo': 'false'
-                    }
-                }) }}
-                    {{ form_row(form.name) }}
-                    <div class="grid grid-cols-2 gap-4">
-                        {{ form_row(form.category) }}
-                        {{ form_row(form.status) }}
+            <input
+                type="hidden"
+                name="_token"
+                value="{{ csrf_token('import-product-' ~ wishlist.accessToken) }}"
+            >
+
+            <button
+                type="submit"
+                name="import_product"
+                value="1"
+                class="shrink-0 bg-[#4ECDC4] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:opacity-90 transition"
+            >
+                Importer
+            </button>
+        </form>
+
+        {# ====================================================== #}
+        {# 2. FORMULAIRE PRODUCT NORMAL                          #}
+        {# ====================================================== #}
+        <div>
+            {{ form_start(form, {
+                attr: {
+                    'data-turbo': 'false'
+                }
+            }) }}
+
+                {{ form_row(form.name) }}
+
+                <div class="grid grid-cols-2 gap-4">
+                    {{ form_row(form.category) }}
+                    {{ form_row(form.status) }}
+                </div>
+
+                {{ form_row(form.price) }}
+
+                {# L'URL de l'image importée est conservée dans ce champ caché. #}
+                {{ form_widget(form.image) }}
+
+                {% if form.vars.data.image %}
+                    {% set previewImage = form.vars.data.image %}
+
+                    {% if not (
+                        previewImage starts with 'http://'
+                        or previewImage starts with 'https://'
+                    ) %}
+                        {% set previewImage = asset(product_upload_path ~ previewImage) %}
+                    {% endif %}
+
+                    <div class="mb-4">
+                        <span class="text-sm font-medium text-[#6B6B6B] mb-1 block">
+                            Aperçu
+                        </span>
+
+                        <img
+                            src="{{ previewImage }}"
+                            alt="Aperçu du produit"
+                            class="w-full h-40 object-contain rounded-xl border border-[rgba(45,45,45,0.15)] bg-white"
+                        >
                     </div>
-                    {{ form_row(form.price) }}
-                    {{ form_row(form.image) }}
-                    {{ form_row(form.url) }}
-                    {{ form_row(form.description) }}
+                {% endif %}
+
+                {{ form_row(form.imageFile) }}
+                {{ form_row(form.url) }}
+                {{ form_row(form.description) }}
 
                 <div class="flex justify-end gap-3 mt-6">
                     <button
@@ -50,9 +116,20 @@
                         Ajouter
                     </button>
                 </div>
-                {{ form_end(form) }}
-            </div>
 
+            {{ form_end(form) }}
+        </div>
     </dialog>
 {% endif %}
 
+{% if isOwner and openProductModal %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dialog = document.querySelector('[data-modal-target="dialog"]');
+
+            if (dialog && !dialog.open) {
+                dialog.showModal();
+            }
+        });
+    </script>
+{% endif %}

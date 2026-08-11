@@ -7,6 +7,7 @@ use App\Entity\ProductUser;
 use App\Entity\Wishlist;
 use App\Enum\ProductStatus;
 use App\Form\ProductType;
+use App\Service\ProductImporter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -22,7 +23,8 @@ final class WishlistController extends AbstractController
         string $token,
         Request $request,
         SluggerInterface $slugger,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        ProductImporter $productImporter,
     ): Response {
         $wishlist = $em
             ->getRepository(Wishlist::class)
@@ -51,27 +53,103 @@ final class WishlistController extends AbstractController
          * n'est disponible que pour les propriétaires.
          */
         $form = null;
+        $openProductModal = false;
 
         if ($isOwner) {
             $product = new Product();
-
             $product->setWishlist($wishlist);
 
+            /*
+             * Le formulaire d'import est volontairement séparé du
+             * ProductType. Son POST contient "import_product".
+             */
+            $isImport = $request->isMethod('POST')
+                && $request->request->has('import_product');
+
+            if ($isImport) {
+                $openProductModal = true;
+
+                if (
+                    !$this->isCsrfTokenValid(
+                        'import-product-' . $wishlist->getAccessToken(),
+                        (string) $request->request->get('_token')
+                    )
+                ) {
+                    throw $this->createAccessDeniedException(
+                        'Jeton CSRF invalide.'
+                    );
+                }
+
+                $url = trim(
+                    (string) $request->request->get('product_url')
+                );
+
+                try {
+                    $data = $productImporter->extract($url);
+
+                    $product->setUrl($data['url']);
+
+                    if ($data['name'] !== null) {
+                        $product->setName($data['name']);
+                    }
+
+                    if ($data['price'] !== null) {
+                        $product->setPrice($data['price']);
+                    }
+
+                    if ($data['image'] !== null) {
+                        $product->setImage($data['image']);
+                    }
+
+                    $this->addFlash(
+                        'success',
+                        'Les informations du produit ont été récupérées.'
+                    );
+                } catch (\Throwable $e) {
+                    // On conserve au minimum l'URL saisie afin que
+                    // l'utilisateur puisse compléter le formulaire à la main.
+                    $product->setUrl($url !== '' ? $url : null);
+
+                    $this->addFlash(
+                        'error',
+                        'Impossible de récupérer automatiquement ce produit.'
+                    );
+                }
+            }
+
+            /*
+             * IMPORTANT : le formulaire est créé APRES l'import.
+             * Les valeurs de $product deviennent donc ses valeurs initiales.
+             */
             $form = $this->createForm(
                 ProductType::class,
                 $product
             );
 
-            $form->handleRequest($request);
+            /*
+             * Le POST "Importer" n'est pas le POST du ProductType.
+             * On ne demande donc à Symfony de traiter le ProductType
+             * que lorsqu'il ne s'agit pas d'un import.
+             */
+            if (!$isImport) {
+                $form->handleRequest($request);
+            }
 
-            if ($form->isSubmitted() && $form->isValid()) {
-                $image = $form
-                    ->get('image')
+            if (
+                $form->isSubmitted()
+                && $form->isValid()
+            ) {
+                $imageFile = $form
+                    ->get('imageFile')
                     ->getData();
 
-                if ($image) {
+                /*
+                 * Si l'utilisateur choisit un fichier local, il remplace
+                 * l'image distante éventuellement récupérée à l'import.
+                 */
+                if ($imageFile) {
                     $originalFilename = pathinfo(
-                        $image->getClientOriginalName(),
+                        $imageFile->getClientOriginalName(),
                         PATHINFO_FILENAME
                     );
 
@@ -84,10 +162,10 @@ final class WishlistController extends AbstractController
                         . '-'
                         . uniqid()
                         . '.'
-                        . $image->guessExtension();
+                        . $imageFile->guessExtension();
 
                     try {
-                        $image->move(
+                        $imageFile->move(
                             'uploads',
                             $newFilename
                         );
@@ -98,8 +176,10 @@ final class WishlistController extends AbstractController
                     } catch (FileException $e) {
                         $this->addFlash(
                             'error',
-                            'Une erreur est survenue lors de l\'upload du fichier.'
+                            "Une erreur est survenue lors de l'upload du fichier."
                         );
+
+                        $openProductModal = true;
                     }
                 }
 
@@ -112,6 +192,10 @@ final class WishlistController extends AbstractController
                         'token' => $wishlist->getAccessToken(),
                     ]
                 );
+            }
+
+            if ($form->isSubmitted() && !$form->isValid()) {
+                $openProductModal = true;
             }
         }
 
@@ -146,6 +230,7 @@ final class WishlistController extends AbstractController
                 'remainingProducts' => $remainingProducts,
                 'form' => $form,
                 'isOwner' => $isOwner,
+                'openProductModal' => $openProductModal,
             ]
         );
     }
@@ -584,7 +669,7 @@ final class WishlistController extends AbstractController
             );
         }
 
-   
+
         $productUser = $em
             ->getRepository(ProductUser::class)
             ->findOneBy([

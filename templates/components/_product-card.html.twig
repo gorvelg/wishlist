@@ -117,11 +117,28 @@
 
     <div class="h-36 w-full overflow-hidden relative">
 
-        <img
-            class="w-full h-full object-cover"
-            src="{{ asset(product_upload_path ~ image) }}"
-            alt="{{ name }}"
-        >
+        {% if image %}
+            {% set imageSrc = image %}
+
+            {% if not (
+                image starts with 'http://'
+                or image starts with 'https://'
+            ) %}
+                {% set imageSrc = asset(product_upload_path ~ image) %}
+            {% endif %}
+
+            <img
+                class="w-full h-full object-cover"
+                src="{{ imageSrc }}"
+                alt="{{ name }}"
+            >
+        {% else %}
+            <div
+                class="w-full h-full flex items-center justify-center bg-[#FFF8F0] text-[#6B6B6B] text-sm"
+            >
+                Aucune image
+            </div>
+        {% endif %}
 
         <div
             class="absolute inset-0"
