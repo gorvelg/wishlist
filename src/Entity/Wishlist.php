@@ -43,8 +43,8 @@ class Wishlist
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $babyName = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTime $dueDate = null;
+    #[ORM\Column(type: Types::DATE_IMMUTABLE)]
+    private ?\DateTimeImmutable $dueDate = null;
 
     #[ORM\Column(length: 255)]
     private ?string $parentsNames = null;
@@ -188,12 +188,12 @@ class Wishlist
         return $this;
     }
 
-    public function getDueDate(): ?\DateTime
+    public function getDueDate(): ?\DateTimeImmutable
     {
         return $this->dueDate;
     }
 
-    public function setDueDate(\DateTime $dueDate): static
+    public function setDueDate(\DateTimeImmutable $dueDate): static
     {
         $this->dueDate = $dueDate;
 

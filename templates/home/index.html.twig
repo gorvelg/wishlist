@@ -20,8 +20,18 @@
                     <div class="inline-flex items-center gap-2 bg-white border border-[rgba(45,45,45,0.1)] rounded-full px-4 py-1.5 text-xs font-medium text-[#6B6B6B] mb-6 shadow-sm"><span>✨</span> La liste de souhaits pour votre famille qui s'agrandit</div>
                     <h1 class="text-5xl sm:text-6xl font-semibold text-[#2D2D2D] leading-[1.1] mb-6" style="font-family: Fraunces, Georgia, serif;">Accueillez votre<br>bébé avec <em class="not-italic text-[#FF6B6B]">joie</em></h1>
                     <p class="text-[#6B6B6B] text-lg leading-relaxed mb-8 max-w-md">Créez une magnifique liste de souhaits pour votre nouveau-né. Partagez-la avec votre famille et vos amis, et laissez-les vous offrir exactement ce dont vous avez besoin.</p>
-                    <div class="flex flex-wrap gap-3"><a class="bg-[#FF6B6B] text-white font-semibold px-8 py-3.5 rounded-full hover:bg-[#e85555] active:scale-95 transition shadow-md" href="{{ path('app_register') }}" data-discover="true">Créer ma liste de naissance</a><a class="bg-white border border-[rgba(45,45,45,0.15)] text-[#2D2D2D] font-medium px-8 py-3.5 rounded-full hover:bg-[#FFF0E8] transition"
-                                                                                                                                                                                                                                                                href="/wishlist" data-discover="true">Voir un exemple →</a></div>
+                    <div class="flex flex-wrap gap-3">
+                        <a
+                            class="bg-[#FF6B6B] text-white font-semibold px-8 py-3.5 rounded-full hover:bg-[#e85555] active:scale-95 transition shadow-md"
+                            href="{{ path('app_wishlist_create', {
+                                step: 'family'
+                                })
+                            }}"
+                            data-discover="true">Créer ma liste de naissance
+                        </a>
+                        <a
+                            class="bg-white border border-[rgba(45,45,45,0.15)] text-[#2D2D2D] font-medium px-8 py-3.5 rounded-full hover:bg-[#FFF0E8] transition"
+                            href="/wishlist" data-discover="true">Voir un exemple →</a></div>
                     <div class="flex items-center gap-3 mt-8">
                         <div class="flex -space-x-2">
                             <div class="w-8 h-8 rounded-full bg-white border-2 border-[#FFF8F0] flex items-center justify-center text-sm shadow-sm">👩</div>
@@ -111,7 +121,14 @@
             </div>
             <div class="relative z-10 max-w-xl mx-auto">
                 <h2 class="text-4xl font-semibold text-white mb-4" style="font-family: Fraunces, Georgia, serif;">Prêt à créer votre liste de naissance ?</h2>
-                <p class="text-white/60 text-lg mb-8">Créez la liste de naissance de votre bébé en moins d'une minute.</p><a class="inline-block bg-[#FF6B6B] text-white font-semibold px-10 py-4 rounded-full hover:bg-[#e85555] active:scale-95 transition shadow-lg text-lg" href="{{ path('app_register') }}" data-discover="true">Créer ma liste de naissance — c’est gratuit</a></div>
+                <p class="text-white/60 text-lg mb-8">Créez la liste de naissance de votre bébé en moins d'une minute.</p>
+                <a
+                    class="inline-block bg-[#FF6B6B] text-white font-semibold px-10 py-4 rounded-full hover:bg-[#e85555] active:scale-95 transition shadow-lg text-lg"
+                    href="{{ path('app_wishlist_create', {
+                        step: 'family'
+                    })
+                    }}"
+                    data-discover="true">Créer ma liste de naissance — c’est gratuit</a></div>
         </section>
         <footer class="bg-[#2D2D2D] border-t border-white/10 py-8 text-center text-xs text-white/30">
             <p>Made with ❤️ for growing families · by <a href="https://guillaume-gorvel.fr">Guillaume Gorvel</a> © 2026</p>

@@ -1,0 +1,159 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Vérifiez votre liste
+{% endblock %}
+
+{% block body %}
+
+    <div class="min-h-screen bg-[#FFF8F0] px-6 py-12">
+
+        <div class="max-w-xl mx-auto">
+
+            {% include 'wishlist/create/_progress.html.twig' %}
+
+
+            <h1 class="text-3xl font-semibold mb-2">
+                Tout est prêt ✨
+            </h1>
+
+            <p class="text-[#6B6B6B] mb-8">
+                Vérifiez les informations avant de créer
+                votre liste.
+            </p>
+
+
+            <div
+                class="
+                    bg-white
+                    border
+                    border-[rgba(45,45,45,0.1)]
+                    rounded-2xl
+                    p-6
+                    space-y-5
+                "
+            >
+
+                <div>
+                    <p class="text-xs text-[#6B6B6B]">
+                        Nom de la liste
+                    </p>
+
+                    <p class="font-semibold">
+                        {{ data.name }}
+                    </p>
+                </div>
+
+
+                <div>
+                    <p class="text-xs text-[#6B6B6B]">
+                        Parents
+                    </p>
+
+                    <p class="font-semibold">
+                        {{ data.parentsNames }}
+                    </p>
+                </div>
+
+
+                {% if data.babyName %}
+
+                    <div>
+                        <p class="text-xs text-[#6B6B6B]">
+                            Prénom du bébé
+                        </p>
+
+                        <p class="font-semibold">
+                            {{ data.babyName }}
+                        </p>
+                    </div>
+
+                {% else %}
+
+                    <div>
+                        <p class="text-xs text-[#6B6B6B]">
+                            Bébé
+                        </p>
+
+                        <p class="font-semibold">
+                            Notre futur bébé 🌿
+                        </p>
+                    </div>
+
+                {% endif %}
+
+
+                <div>
+                    <p class="text-xs text-[#6B6B6B]">
+                        Arrivée prévue
+                    </p>
+
+                    <p class="font-semibold">
+                        {{ data.dueDate|date('d/m/Y') }}
+                    </p>
+                </div>
+
+
+                {% if data.visitorMessage %}
+
+                    <div>
+                        <p class="text-xs text-[#6B6B6B] mb-1">
+                            Message pour vos proches
+                        </p>
+
+                        <p class="text-sm">
+                            {{ data.visitorMessage }}
+                        </p>
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            {{ form_start(form) }}
+
+            <div
+                class="
+                        flex
+                        justify-between
+                        items-center
+                        mt-8
+                    "
+            >
+
+                <a
+                    href="{{ path(
+                        'app_wishlist_create',
+                        {
+                            step: 'baby'
+                        }
+                    ) }}"
+                >
+                    ← Modifier
+                </a>
+
+
+                <button
+                    type="submit"
+                    class="
+                            bg-[#FF6B6B]
+                            text-white
+                            font-semibold
+                            px-6
+                            py-3
+                            rounded-xl
+                        "
+                >
+                    Créer ma liste
+                </button>
+
+            </div>
+
+            {{ form_end(form) }}
+
+        </div>
+
+    </div>
+
+{% endblock %}
