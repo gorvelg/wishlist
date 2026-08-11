@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\WishlistRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: WishlistRepository::class)]
@@ -38,6 +39,18 @@ class Wishlist
      */
     #[ORM\OneToMany(targetEntity: Product::class, mappedBy: 'wishlist')]
     private Collection $products;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $babyName = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private ?\DateTime $dueDate = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $parentsNames = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $message = null;
 
     public function __construct()
     {
@@ -159,6 +172,54 @@ class Wishlist
                 $product->setWishlist(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getBabyName(): ?string
+    {
+        return $this->babyName;
+    }
+
+    public function setBabyName(?string $babyName): static
+    {
+        $this->babyName = $babyName;
+
+        return $this;
+    }
+
+    public function getDueDate(): ?\DateTime
+    {
+        return $this->dueDate;
+    }
+
+    public function setDueDate(\DateTime $dueDate): static
+    {
+        $this->dueDate = $dueDate;
+
+        return $this;
+    }
+
+    public function getParentsNames(): ?string
+    {
+        return $this->parentsNames;
+    }
+
+    public function setParentsNames(string $parentsNames): static
+    {
+        $this->parentsNames = $parentsNames;
+
+        return $this;
+    }
+
+    public function getMessage(): ?string
+    {
+        return $this->message;
+    }
+
+    public function setMessage(?string $message): static
+    {
+        $this->message = $message;
 
         return $this;
     }
