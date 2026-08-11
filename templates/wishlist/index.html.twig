@@ -49,10 +49,11 @@
 
         <div class="flex flex-wrap items-center gap-3 justify-between">
             {% if isOwner %}
-            <div
-                class="flex items-center gap-3"
-                data-controller="modal"
-            >
+                <div
+                    class="flex items-center gap-3"
+                    data-controller="modal"
+                    data-modal-auto-open-value="{{ openProductModal|default(false) ? 'true' : 'false' }}"
+                >
                 <button
                     class="flex items-center gap-2 bg-[#FF6B6B] text-white text-sm font-semibold px-5 py-2 rounded-full hover:bg-[#e85555] active:scale-95 transition shadow-sm"
                     type="button"

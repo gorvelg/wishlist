@@ -38,20 +38,12 @@ final class WishlistController extends AbstractController
 
         $user = $this->getUser();
 
-        /*
-         * Vérifie si l'utilisateur connecté
-         * est propriétaire de la wishlist.
-         */
         $isOwner = $user !== null
             && $wishlist->getWishlistOwners()->exists(
                 fn ($key, $wishlistOwner) =>
                     $wishlistOwner->getUser() === $user
             );
 
-        /*
-         * Le formulaire d'ajout de produit
-         * n'est disponible que pour les propriétaires.
-         */
         $form = null;
         $openProductModal = false;
 
@@ -59,10 +51,6 @@ final class WishlistController extends AbstractController
             $product = new Product();
             $product->setWishlist($wishlist);
 
-            /*
-             * Le formulaire d'import est volontairement séparé du
-             * ProductType. Son POST contient "import_product".
-             */
             $isImport = $request->isMethod('POST')
                 && $request->request->has('import_product');
 
@@ -106,8 +94,6 @@ final class WishlistController extends AbstractController
                         'Les informations du produit ont été récupérées.'
                     );
                 } catch (\Throwable $e) {
-                    // On conserve au minimum l'URL saisie afin que
-                    // l'utilisateur puisse compléter le formulaire à la main.
                     $product->setUrl($url !== '' ? $url : null);
 
                     $this->addFlash(
@@ -117,20 +103,11 @@ final class WishlistController extends AbstractController
                 }
             }
 
-            /*
-             * IMPORTANT : le formulaire est créé APRES l'import.
-             * Les valeurs de $product deviennent donc ses valeurs initiales.
-             */
             $form = $this->createForm(
                 ProductType::class,
                 $product
             );
 
-            /*
-             * Le POST "Importer" n'est pas le POST du ProductType.
-             * On ne demande donc à Symfony de traiter le ProductType
-             * que lorsqu'il ne s'agit pas d'un import.
-             */
             if (!$isImport) {
                 $form->handleRequest($request);
             }
@@ -143,10 +120,6 @@ final class WishlistController extends AbstractController
                     ->get('imageFile')
                     ->getData();
 
-                /*
-                 * Si l'utilisateur choisit un fichier local, il remplace
-                 * l'image distante éventuellement récupérée à l'import.
-                 */
                 if ($imageFile) {
                     $originalFilename = pathinfo(
                         $imageFile->getClientOriginalName(),
@@ -235,21 +208,6 @@ final class WishlistController extends AbstractController
         );
     }
 
-    /*
-     * ============================================================
-     * CLAIM / ANNULER UN CLAIM
-     * ============================================================
-     *
-     * Premier clic :
-     * available -> buying
-     * création ProductUser
-     *
-     * Deuxième clic :
-     * suppression ProductUser
-     *
-     * Si plus aucun participant :
-     * buying -> available
-     */
     #[Route(
         '/wishlist/{token}/product/{id}/purchase',
         name: 'app_product_purchase',
@@ -261,20 +219,13 @@ final class WishlistController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
     ): Response {
-        /*
-         * L'utilisateur doit être connecté.
-         */
+
         $this->denyAccessUnlessGranted(
             'IS_AUTHENTICATED_FULLY'
         );
 
         $user = $this->getUser();
 
-        /*
-         * Sécurité :
-         * vérifie que le produit appartient bien
-         * à la wishlist correspondant au token.
-         */
         if (
             $product->getWishlist()?->getAccessToken()
             !== $token
@@ -282,9 +233,6 @@ final class WishlistController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        /*
-         * Vérification du CSRF.
-         */
         if (
             !$this->isCsrfTokenValid(
                 'purchase-' . $product->getId(),
@@ -296,13 +244,6 @@ final class WishlistController extends AbstractController
             );
         }
 
-        /*
-         * Un produit PURCHASED est verrouillé.
-         *
-         * On fait cette vérification AVANT de chercher
-         * le ProductUser pour empêcher également
-         * un participant d'annuler après achat.
-         */
         if (
             $product->getStatus()
             === ProductStatus::PURCHASED
@@ -320,12 +261,6 @@ final class WishlistController extends AbstractController
             );
         }
 
-        /*
-         * Cherche si l'utilisateur participe déjà.
-         *
-         * IMPORTANT :
-         * c'est "user" et non "User".
-         */
         $existingProductUser = $em
             ->getRepository(ProductUser::class)
             ->findOneBy([
@@ -333,17 +268,8 @@ final class WishlistController extends AbstractController
                 'user' => $user,
             ]);
 
-        /*
-         * ========================================================
-         * L'utilisateur participe déjà :
-         * on annule sa participation.
-         * ========================================================
-         */
         if ($existingProductUser !== null) {
-            /*
-             * Retire également l'objet de la collection Product
-             * afin que getProductUsers() soit immédiatement à jour.
-             */
+
             $product->removeProductUser(
                 $existingProductUser
             );
@@ -352,10 +278,6 @@ final class WishlistController extends AbstractController
                 $existingProductUser
             );
 
-            /*
-             * Si c'était le dernier participant,
-             * le produit redevient disponible.
-             */
             if (
                 $product
                     ->getProductUsers()
@@ -365,9 +287,6 @@ final class WishlistController extends AbstractController
                     ProductStatus::AVAILABLE
                 );
             } else {
-                /*
-                 * Il reste d'autres participants.
-                 */
                 $product->setStatus(
                     ProductStatus::BUYING
                 );
@@ -388,22 +307,13 @@ final class WishlistController extends AbstractController
             );
         }
 
-        /*
-         * ========================================================
-         * L'utilisateur ne participe pas encore :
-         * création du ProductUser.
-         * ========================================================
-         */
         $productUser = new ProductUser();
 
         $productUser
             ->setProduct($product)
             ->setUser($user);
 
-        /*
-         * Dès qu'au moins une personne participe,
-         * le cadeau passe en BUYING.
-         */
+
         $product->setStatus(
             ProductStatus::BUYING
         );
@@ -427,22 +337,6 @@ final class WishlistController extends AbstractController
         );
     }
 
-    /*
-     * ============================================================
-     * MARQUER LE PRODUIT COMME ACHETÉ
-     * ============================================================
-     *
-     * Disponible uniquement si :
-     *
-     * 1. utilisateur connecté
-     * 2. produit appartenant à la wishlist
-     * 3. produit non déjà purchased
-     * 4. utilisateur présent dans product_user
-     *
-     * Donc :
-     *
-     * USER doit avoir CLAIM avant de pouvoir confirmer l'achat.
-     */
     #[Route(
         '/wishlist/{token}/product/{id}/purchased',
         name: 'app_product_mark_purchased',
@@ -454,19 +348,13 @@ final class WishlistController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
     ): Response {
-        /*
-         * Connexion obligatoire.
-         */
+
         $this->denyAccessUnlessGranted(
             'IS_AUTHENTICATED_FULLY'
         );
 
         $user = $this->getUser();
 
-        /*
-         * Vérifie que le produit correspond bien
-         * à la wishlist visible.
-         */
         if (
             $product->getWishlist()?->getAccessToken()
             !== $token
@@ -474,9 +362,6 @@ final class WishlistController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        /*
-         * Protection CSRF.
-         */
         if (
             !$this->isCsrfTokenValid(
                 'product-purchased-' . $product->getId(),
@@ -488,9 +373,6 @@ final class WishlistController extends AbstractController
             );
         }
 
-        /*
-         * Le produit est déjà acheté.
-         */
         if (
             $product->getStatus()
             === ProductStatus::PURCHASED
@@ -508,18 +390,7 @@ final class WishlistController extends AbstractController
             );
         }
 
-        /*
-         * ========================================================
-         * LA VÉRIFICATION IMPORTANTE
-         * ========================================================
-         *
-         * Existe-t-il une ligne :
-         *
-         * product_id = ce produit
-         * user_id    = utilisateur connecté
-         *
-         * dans product_user ?
-         */
+
         $productUser = $em
             ->getRepository(ProductUser::class)
             ->findOneBy([
@@ -527,14 +398,6 @@ final class WishlistController extends AbstractController
                 'user' => $user,
             ]);
 
-        /*
-         * Aucun ProductUser :
-         *
-         * l'utilisateur n'a jamais claim ce cadeau.
-         *
-         * Il n'a donc PAS le droit de le passer
-         * en PURCHASED.
-         */
         if ($productUser === null) {
             $this->addFlash(
                 'error',
@@ -549,13 +412,6 @@ final class WishlistController extends AbstractController
             );
         }
 
-        /*
-         * Normalement, si ProductUser existe,
-         * le produit doit être BUYING.
-         *
-         * Cette vérification protège contre
-         * un éventuel état incohérent.
-         */
         if (
             $product->getStatus()
             !== ProductStatus::BUYING
@@ -573,25 +429,10 @@ final class WishlistController extends AbstractController
             );
         }
 
-        /*
-         * ========================================================
-         * Tout est OK :
-         *
-         * BUYING -> PURCHASED
-         * ========================================================
-         */
         $product->setStatus(
             ProductStatus::PURCHASED
         );
 
-        /*
-         * IMPORTANT :
-         *
-         * On NE SUPPRIME PAS les ProductUser.
-         *
-         * Ils permettent de conserver la liste
-         * des personnes ayant participé au cadeau.
-         */
         $em->flush();
 
         $this->addFlash(
@@ -624,9 +465,6 @@ final class WishlistController extends AbstractController
 
         $user = $this->getUser();
 
-        /*
-         * Le produit doit appartenir à la wishlist.
-         */
         if (
             $product->getWishlist()?->getAccessToken()
             !== $token
@@ -634,9 +472,6 @@ final class WishlistController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        /*
-         * Vérification CSRF.
-         */
         if (
             !$this->isCsrfTokenValid(
                 'cancel-purchased-' . $product->getId(),
@@ -648,10 +483,6 @@ final class WishlistController extends AbstractController
             );
         }
 
-        /*
-         * On ne peut annuler que si le produit
-         * est actuellement PURCHASED.
-         */
         if (
             $product->getStatus()
             !== ProductStatus::PURCHASED
@@ -669,7 +500,6 @@ final class WishlistController extends AbstractController
             );
         }
 
-
         $productUser = $em
             ->getRepository(ProductUser::class)
             ->findOneBy([
@@ -677,9 +507,6 @@ final class WishlistController extends AbstractController
                 'user' => $user,
             ]);
 
-        /*
-         * Pas participant = pas le droit d'annuler.
-         */
         if ($productUser === null) {
             $this->addFlash(
                 'error',
@@ -693,7 +520,6 @@ final class WishlistController extends AbstractController
                 ]
             );
         }
-
 
         $product->setStatus(
             ProductStatus::BUYING

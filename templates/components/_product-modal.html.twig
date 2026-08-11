@@ -122,14 +122,4 @@
     </dialog>
 {% endif %}
 
-{% if isOwner and openProductModal %}
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const dialog = document.querySelector('[data-modal-target="dialog"]');
 
-            if (dialog && !dialog.open) {
-                dialog.showModal();
-            }
-        });
-    </script>
-{% endif %}
