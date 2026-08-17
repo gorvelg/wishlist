@@ -112,6 +112,7 @@ class ProductType extends AbstractType
                 'attr' => [
                     'class' => $inputClass,
                     'placeholder' => 'Préférence de couleur, marque, taille...',
+                    'maxlength' => 200,
                 ],
                 'label_attr' => [
                     'class' => $labelClass,

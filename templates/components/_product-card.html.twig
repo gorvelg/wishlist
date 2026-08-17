@@ -117,6 +117,25 @@
 
     <div class="h-36 w-full overflow-hidden relative">
 
+        {% if isOwner %}
+        <form
+            class="absolute z-10 right-3 top-1 hover:text-red-700 transition-colors"
+            method="post"
+            action="{{ path('app_product_delete', { id: productId }) }}"
+            onsubmit="return confirm('Supprimer ce produit ?');"
+        >
+            <input
+                type="hidden"
+                name="_token"
+                value="{{ csrf_token('delete_product_' ~ productId ) }}"
+            >
+
+            <button type="submit">
+                ✕
+            </button>
+        </form>
+        {% endif %}
+
         {% if image %}
             {% set imageSrc = image %}
 
@@ -400,7 +419,7 @@
                                     {{
                                     hasReserved
                                     ? 'Annuler'
-                                    : 'Offrir'
+                                    : 'Réserver'
                                     }}
                                 </button>
 
@@ -493,7 +512,7 @@
                                 transition-colors
                             "
                         >
-                            Offrir
+                            Réserver
                         </a>
 
                     {% endif %}
@@ -507,3 +526,4 @@
     </div>
 
 </article>
+

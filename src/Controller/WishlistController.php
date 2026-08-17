@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Product;
 use App\Entity\ProductUser;
 use App\Entity\Wishlist;
+use App\Entity\WishlistOwner;
 use App\Enum\ProductStatus;
 use App\Form\ProductType;
 use App\Service\ProductImporter;
@@ -15,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
+
 
 final class WishlistController extends AbstractController
 {
@@ -170,6 +172,8 @@ final class WishlistController extends AbstractController
             if ($form->isSubmitted() && !$form->isValid()) {
                 $openProductModal = true;
             }
+
+
         }
 
         /*
@@ -538,5 +542,46 @@ final class WishlistController extends AbstractController
                 'token' => $token,
             ]
         );
+    }
+
+
+    #[Route('/product/{id}/delete', name: 'app_product_delete', methods: ['POST'])]
+    public function delete(
+        Product $product,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response {
+        $wishlist = $product->getWishlist();
+
+        // 1. Vérification du propriétaire
+
+        $isOwner = $wishlist->getWishlistOwners()->exists(
+            fn (int $key, WishlistOwner $owner) =>
+                $owner->getUser() === $this->getUser()
+        );
+
+        if (!$isOwner) {
+            throw $this->createAccessDeniedException(
+                'Vous ne pouvez pas supprimer ce produit.'
+            );
+        }
+
+        // 2. Vérification CSRF
+        if (!$this->isCsrfTokenValid(
+            'delete_product_' . $product->getId(),
+            $request->getPayload()->getString('_token')
+        )) {
+            throw $this->createAccessDeniedException('Token CSRF invalide.');
+        }
+
+        // 3. Suppression
+        $entityManager->remove($product);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Produit supprimé.');
+
+        return $this->redirectToRoute('app_wishlist', [
+            'token' => $wishlist->getAccessToken(),
+        ]);
     }
 }

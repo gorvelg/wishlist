@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
@@ -52,6 +53,12 @@ class Product
     #[ORM\JoinColumn(nullable: false)]
     private ?Wishlist $wishlist = null;
 
+    #[Assert\Length(
+        min: 2,
+        max: 200,
+        minMessage: 'Votre description doit avoir au minimum {{ limit }} caractères.',
+        maxMessage: 'Votre description ne peut pas dépasser {{ limit }} caractères.',
+    )]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
