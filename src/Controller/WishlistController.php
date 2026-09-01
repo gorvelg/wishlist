@@ -28,6 +28,12 @@ final class WishlistController extends AbstractController
         EntityManagerInterface $em,
         ProductImporter $productImporter,
     ): Response {
+        /*
+         * ===============================================
+         * RÉCUPÉRATION DE LA WISHLIST
+         * ===============================================
+         */
+
         $wishlist = $em
             ->getRepository(Wishlist::class)
             ->findOneBy([
@@ -38,6 +44,13 @@ final class WishlistController extends AbstractController
             throw $this->createNotFoundException();
         }
 
+
+        /*
+         * ===============================================
+         * VÉRIFICATION DU PROPRIÉTAIRE
+         * ===============================================
+         */
+
         $user = $this->getUser();
 
         $isOwner = $user !== null
@@ -46,19 +59,97 @@ final class WishlistController extends AbstractController
                     $wishlistOwner->getUser() === $user
             );
 
+
+        /*
+         * ===============================================
+         * VARIABLES DE LA MODALE PRODUIT
+         * ===============================================
+         */
+
         $form = null;
         $openProductModal = false;
+        $editingProduct = false;
+
 
         if ($isOwner) {
-            $product = new Product();
-            $product->setWishlist($wishlist);
+
+            /*
+             * ===============================================
+             * CRÉATION OU MODIFICATION ?
+             * ===============================================
+             *
+             * Exemple :
+             *
+             * /wishlist/xxx
+             * => création
+             *
+             * /wishlist/xxx?edit=42
+             * => modification du produit 42
+             */
+
+            $editProductId = $request->query->getInt('edit');
+
+
+            if ($editProductId > 0) {
+
+                /*
+                 * On récupère le produit existant.
+                 */
+                $product = $em
+                    ->getRepository(Product::class)
+                    ->find($editProductId);
+
+
+                /*
+                 * Sécurité :
+                 *
+                 * le produit doit exister ET appartenir
+                 * à cette wishlist.
+                 */
+                if (
+                    !$product
+                    || $product->getWishlist() !== $wishlist
+                ) {
+                    throw $this->createNotFoundException();
+                }
+
+
+                /*
+                 * Comme on modifie un produit,
+                 * on ouvre automatiquement la modale.
+                 */
+                $editingProduct = true;
+                $openProductModal = true;
+
+            } else {
+
+                /*
+                 * Sinon on crée simplement un nouveau produit.
+                 */
+                $product = new Product();
+
+                $product->setWishlist($wishlist);
+            }
+
+
+            /*
+             * ===============================================
+             * IMPORT D'UN PRODUIT DEPUIS UNE URL
+             * ===============================================
+             */
 
             $isImport = $request->isMethod('POST')
                 && $request->request->has('import_product');
 
+
             if ($isImport) {
+
                 $openProductModal = true;
 
+
+                /*
+                 * Vérification CSRF.
+                 */
                 if (
                     !$this->isCsrfTokenValid(
                         'import-product-' . $wishlist->getAccessToken(),
@@ -70,33 +161,56 @@ final class WishlistController extends AbstractController
                     );
                 }
 
+
                 $url = trim(
                     (string) $request->request->get('product_url')
                 );
 
+
                 try {
+
                     $data = $productImporter->extract($url);
 
-                    $product->setUrl($data['url']);
+
+                    $product->setUrl(
+                        $data['url']
+                    );
+
 
                     if ($data['name'] !== null) {
-                        $product->setName($data['name']);
+                        $product->setName(
+                            $data['name']
+                        );
                     }
+
 
                     if ($data['price'] !== null) {
-                        $product->setPrice($data['price']);
+                        $product->setPrice(
+                            $data['price']
+                        );
                     }
 
+
                     if ($data['image'] !== null) {
-                        $product->setImage($data['image']);
+                        $product->setImage(
+                            $data['image']
+                        );
                     }
+
 
                     $this->addFlash(
                         'success',
                         'Les informations du produit ont été récupérées.'
                     );
+
                 } catch (\Throwable $e) {
-                    $product->setUrl($url !== '' ? $url : null);
+
+                    $product->setUrl(
+                        $url !== ''
+                            ? $url
+                            : null
+                    );
+
 
                     $this->addFlash(
                         'error',
@@ -105,32 +219,71 @@ final class WishlistController extends AbstractController
                 }
             }
 
+
+            /*
+             * ===============================================
+             * FORMULAIRE
+             * ===============================================
+             *
+             * IMPORTANT :
+             *
+             * Ici ProductType ne sait pas s'il crée
+             * ou modifie un produit.
+             *
+             * Symfony regarde simplement l'objet $product.
+             *
+             * Produit vide   => création
+             * Produit rempli => modification
+             */
+
             $form = $this->createForm(
                 ProductType::class,
                 $product
             );
 
+
+            /*
+             * Pendant l'import, on ne veut pas traiter
+             * ProductType comme s'il avait été soumis.
+             */
             if (!$isImport) {
-                $form->handleRequest($request);
+                $form->handleRequest(
+                    $request
+                );
             }
+
+
+            /*
+             * ===============================================
+             * ENREGISTREMENT
+             * ===============================================
+             */
 
             if (
                 $form->isSubmitted()
                 && $form->isValid()
             ) {
+
+                /*
+                 * Upload éventuel d'une nouvelle image.
+                 */
                 $imageFile = $form
                     ->get('imageFile')
                     ->getData();
 
+
                 if ($imageFile) {
+
                     $originalFilename = pathinfo(
                         $imageFile->getClientOriginalName(),
                         PATHINFO_FILENAME
                     );
 
+
                     $safeFilename = $slugger->slug(
                         $originalFilename
                     );
+
 
                     $newFilename =
                         $safeFilename
@@ -139,75 +292,174 @@ final class WishlistController extends AbstractController
                         . '.'
                         . $imageFile->guessExtension();
 
+
                     try {
+
                         $imageFile->move(
                             'uploads',
                             $newFilename
                         );
 
+
                         $product->setImage(
                             $newFilename
                         );
+
                     } catch (FileException $e) {
+
                         $this->addFlash(
                             'error',
                             "Une erreur est survenue lors de l'upload du fichier."
                         );
 
+
                         $openProductModal = true;
                     }
                 }
 
-                $em->persist($product);
+
+                /*
+                 * ===========================================
+                 * NOUVEAU PRODUIT
+                 * ===========================================
+                 *
+                 * Un produit qui n'a pas encore d'ID
+                 * n'existe pas encore dans la base.
+                 */
+
+                if ($product->getId() === null) {
+
+                    $em->persist(
+                        $product
+                    );
+
+                } else {
+
+                    /*
+                     * =======================================
+                     * PRODUIT EXISTANT
+                     * =======================================
+                     *
+                     * Doctrine connaît déjà le produit.
+                     * Pas besoin de persist().
+                     */
+
+                    $product->setUpdatedAt(
+                        new \DateTimeImmutable()
+                    );
+                }
+
+
                 $em->flush();
 
+
+                /*
+                 * Message différent suivant le cas.
+                 */
+                $this->addFlash(
+                    'success',
+                    $editingProduct
+                        ? 'Le cadeau a bien été modifié.'
+                        : 'Le cadeau a bien été ajouté.'
+                );
+
+
+                /*
+                 * On revient à l'URL sans ?edit=42.
+                 *
+                 * La modale sera donc refermée.
+                 */
                 return $this->redirectToRoute(
                     'app_wishlist',
                     [
-                        'token' => $wishlist->getAccessToken(),
+                        'token' =>
+                            $wishlist->getAccessToken(),
                     ]
                 );
             }
 
-            if ($form->isSubmitted() && !$form->isValid()) {
+
+            /*
+             * Si le formulaire contient une erreur,
+             * on laisse la modale ouverte.
+             */
+            if (
+                $form->isSubmitted()
+                && !$form->isValid()
+            ) {
                 $openProductModal = true;
             }
-
-
         }
 
+
         /*
-         * Statistiques
+         * ===============================================
+         * STATISTIQUES
+         * ===============================================
          */
+
         $products = $wishlist->getProducts();
 
-        $countProducts = count($products);
+        $countProducts = count(
+            $products
+        );
 
         $giftedProducts = 0;
 
-        foreach ($products as $product) {
+
+        foreach ($products as $wishlistProduct) {
+
             if (
-                $product->getStatus()
+                $wishlistProduct->getStatus()
                 === ProductStatus::PURCHASED
             ) {
                 $giftedProducts++;
             }
         }
 
+
         $remainingProducts =
-            $countProducts - $giftedProducts;
+            $countProducts
+            - $giftedProducts;
+
+
+        /*
+         * ===============================================
+         * AFFICHAGE
+         * ===============================================
+         */
 
         return $this->render(
             'wishlist/index.html.twig',
             [
                 'wishlist' => $wishlist,
                 'products' => $products,
-                'countProducts' => $countProducts,
-                'giftedProducts' => $giftedProducts,
-                'remainingProducts' => $remainingProducts,
+
+                'countProducts' =>
+                    $countProducts,
+
+                'giftedProducts' =>
+                    $giftedProducts,
+
+                'remainingProducts' =>
+                    $remainingProducts,
+
                 'form' => $form,
-                'isOwner' => $isOwner,
-                'openProductModal' => $openProductModal,
+
+                'isOwner' =>
+                    $isOwner,
+
+                'openProductModal' =>
+                    $openProductModal,
+
+                /*
+                 * Nouveau :
+                 *
+                 * permet au Twig de savoir si
+                 * la modale est en mode édition.
+                 */
+                'editingProduct' =>
+                    $editingProduct,
             ]
         );
     }

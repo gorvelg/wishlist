@@ -118,22 +118,33 @@
     <div class="h-36 w-full overflow-hidden relative">
 
         {% if isOwner %}
-        <form
-            class="absolute z-10 right-3 top-1 hover:text-red-700 transition-colors"
-            method="post"
-            action="{{ path('app_product_delete', { id: productId }) }}"
-            onsubmit="return confirm('Supprimer ce produit ?');"
-        >
-            <input
-                type="hidden"
-                name="_token"
-                value="{{ csrf_token('delete_product_' ~ productId ) }}"
-            >
+            <div class="absolute z-10 right-3 top-1 flex items-center gap-1">
+                <a
+                    class="bg-white rounded-full p-0.5 shadow-2xl text-[#2D2D2D]"
+                    href="{{ path('app_wishlist', {
+                        token: wishlistToken,
+                        edit: productId
+                    }) }}"
+                >
+                    {% include 'components/icons/edit.html.twig' %}
+                </a>
+                <form
+                    class="text-[#2D2D2D] hover:text-red-700 transition-colors block bg-white rounded-full p-0.5 shadow-2xl"
+                    method="post"
+                    action="{{ path('app_product_delete', { id: productId }) }}"
+                    onsubmit="return confirm('Supprimer ce produit ?');"
+                >
+                    <input
+                        type="hidden"
+                        name="_token"
+                        value="{{ csrf_token('delete_product_' ~ productId ) }}"
+                    >
 
-            <button type="submit">
-                ✕
-            </button>
-        </form>
+                    <button class="block" type="submit">
+                        {% include 'components/icons/trash.html.twig' %}
+                    </button>
+                </form>
+            </div>
         {% endif %}
 
         {% if image %}
@@ -266,7 +277,7 @@
 
             <div class="flex justify-between gap-2">
 
-                <h3 class="font-semibold">
+                <h3 class="font-semibold text-[#2D2D2D]">
                     {{ name }}
                 </h3>
 

@@ -1,36 +1,71 @@
 {% if isOwner %}
+
+    {% set formAction = editingProduct
+        ? path('app_wishlist', {
+        token: wishlist.accessToken,
+        edit: form.vars.data.id
+    })
+        : path('app_wishlist', {
+        token: wishlist.accessToken
+    })
+    %}
+
     <dialog
         data-modal-target="dialog"
         class="w-[500px] max-w-[90vw] fixed rounded-2xl p-6 backdrop:bg-black/30 backdrop:backdrop-blur-sm top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
     >
+
         <div class="absolute top-0 right-0 w-24 h-24 rounded-bl-full bg-[#FFE66D] opacity-30"></div>
 
         <div class="flex items-center justify-between mb-6">
-            <button
-                type="button"
-                data-action="click->modal#close"
-            >
-                ✕
-            </button>
+
+            {% if editingProduct %}
+
+                <a
+                    href="{{ path('app_wishlist', {
+                        token: wishlist.accessToken
+                    }) }}"
+                >
+                    ✕
+                </a>
+
+            {% else %}
+
+                <button
+                    type="button"
+                    data-action="click->modal#close"
+                >
+                    ✕
+                </button>
+
+            {% endif %}
+
         </div>
 
+
         <h2 class="font-display text-2xl font-semibold text-[#2D2D2D] mb-6">
-            Ajouter un souhait
+            {{ editingProduct
+            ? 'Modifier le souhait'
+            : 'Ajouter un souhait'
+            }}
         </h2>
 
-        {# ====================================================== #}
-        {# 1. PETIT FORMULAIRE D'IMPORT                           #}
-        {# ====================================================== #}
+
+        {# ============================================= #}
+        {# IMPORT URL                                    #}
+        {# ============================================= #}
+
         <form
             method="post"
-            action="{{ path('app_wishlist', { token: wishlist.accessToken }) }}"
+            action="{{ formAction }}"
             class="flex gap-2 mb-6"
             data-turbo="false"
         >
+
             <input
                 type="url"
                 name="product_url"
-                value="{{ form.vars.data.url ?? '' }}"
+                value="{{ form.vars.data.url|default('') }}"
                 placeholder="https://www.exemple.com/produit"
                 required
                 class="flex-1 min-w-0 rounded-xl border border-[rgba(45,45,45,0.15)] px-4 py-2.5 text-[#2D2D2D] text-sm focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/60 transition"
@@ -50,58 +85,85 @@
             >
                 Importer
             </button>
+
         </form>
 
-        {# ====================================================== #}
-        {# 2. FORMULAIRE PRODUCT NORMAL                          #}
-        {# ====================================================== #}
+
+        {# ============================================= #}
+        {# FORMULAIRE PRODUIT                            #}
+        {# ============================================= #}
+
         <div>
+
             {{ form_start(form, {
                 attr: {
                     'data-turbo': 'false'
                 }
             }) }}
 
-                {{ form_row(form.name) }}
+            {{ form_row(form.name) }}
 
-                <div class="grid grid-cols-2 gap-4">
-                    {{ form_row(form.category) }}
-                    {{ form_row(form.status) }}
-                </div>
+            <div class="grid grid-cols-2 gap-4">
+                {{ form_row(form.category) }}
+                {{ form_row(form.status) }}
+            </div>
 
-                {{ form_row(form.price) }}
+            {{ form_row(form.price) }}
 
-                {# L'URL de l'image importée est conservée dans ce champ caché. #}
-                {{ form_widget(form.image) }}
+            {{ form_widget(form.image) }}
 
-                {% if form.vars.data.image %}
-                    {% set previewImage = form.vars.data.image %}
 
-                    {% if not (
-                        previewImage starts with 'http://'
-                        or previewImage starts with 'https://'
+            {% if form.vars.data.image %}
+
+                {% set previewImage = form.vars.data.image %}
+
+                {% if not (
+                    previewImage starts with 'http://'
+                    or previewImage starts with 'https://'
                     ) %}
-                        {% set previewImage = asset(product_upload_path ~ previewImage) %}
-                    {% endif %}
 
-                    <div class="mb-4">
+                    {% set previewImage =
+                        asset(product_upload_path ~ previewImage)
+                    %}
+
+                {% endif %}
+
+                <div class="mb-4">
+
                         <span class="text-sm font-medium text-[#6B6B6B] mb-1 block">
                             Aperçu
                         </span>
 
-                        <img
-                            src="{{ previewImage }}"
-                            alt="Aperçu du produit"
-                            class="w-full h-40 object-contain rounded-xl border border-[rgba(45,45,45,0.15)] bg-white"
-                        >
-                    </div>
-                {% endif %}
+                    <img
+                        src="{{ previewImage }}"
+                        alt="Aperçu du produit"
+                        class="w-full h-40 object-contain rounded-xl border border-[rgba(45,45,45,0.15)] bg-white"
+                    >
 
-                {{ form_row(form.imageFile) }}
-                {{ form_row(form.url) }}
-                {{ form_row(form.description) }}
+                </div>
 
-                <div class="flex justify-end gap-3 mt-6">
+            {% endif %}
+
+
+            {{ form_row(form.imageFile) }}
+            {{ form_row(form.url) }}
+            {{ form_row(form.description) }}
+
+
+            <div class="flex justify-end gap-3 mt-6">
+
+                {% if editingProduct %}
+
+                    <a
+                        href="{{ path('app_wishlist', {
+                            token: wishlist.accessToken
+                        }) }}"
+                    >
+                        Annuler
+                    </a>
+
+                {% else %}
+
                     <button
                         type="button"
                         data-action="click->modal#close"
@@ -109,17 +171,25 @@
                         Annuler
                     </button>
 
-                    <button
-                        type="submit"
-                        class="bg-[#FF6B6B] text-white font-semibold px-5 py-2 rounded-full hover:bg-[#e85555]"
-                    >
-                        Ajouter
-                    </button>
-                </div>
+                {% endif %}
+
+
+                <button
+                    type="submit"
+                    class="bg-[#FF6B6B] text-white font-semibold px-5 py-2 rounded-full hover:bg-[#e85555]"
+                >
+                    {{ editingProduct
+                    ? 'Enregistrer les modifications'
+                    : 'Ajouter'
+                    }}
+                </button>
+
+            </div>
 
             {{ form_end(form) }}
+
         </div>
+
     </dialog>
+
 {% endif %}
-
-
