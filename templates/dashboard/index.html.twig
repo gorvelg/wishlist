@@ -1,0 +1,317 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes listes{% endblock %}
+
+{% block body %}
+
+    {# ====================================================== #}
+    {# HEADER                                                 #}
+    {# ====================================================== #}
+
+    <header class="relative overflow-hidden bg-[#FFF8F0] pt-16 pb-12 px-6">
+
+        {# Décoration de fond, reprise du style wishlist #}
+        <div
+            class="pointer-events-none absolute inset-0 overflow-hidden"
+            aria-hidden="true"
+        >
+            <div class="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-[#FFE66D] opacity-40"></div>
+
+            <svg
+                class="absolute top-4 right-16 opacity-30"
+                width="80"
+                height="80"
+                viewBox="0 0 80 80"
+            >
+                <polygon
+                    points="40,4 76,76 4,76"
+                    fill="#4ECDC4"
+                ></polygon>
+            </svg>
+
+            <svg
+                class="absolute top-1/2 -left-6 opacity-20"
+                width="60"
+                height="120"
+                viewBox="0 0 60 120"
+            >
+                <path
+                    d="M30 0 C60 20 0 40 30 60 C60 80 0 100 30 120"
+                    stroke="#FF6B6B"
+                    stroke-width="6"
+                    fill="none"
+                    stroke-linecap="round"
+                ></path>
+            </svg>
+
+            <div class="absolute -bottom-16 -right-16 w-56 h-56 rounded-full bg-[#C7B8EA] opacity-30"></div>
+
+            <div
+                class="absolute top-1/3 right-8 w-24 h-24 opacity-20"
+                style="
+                    background-image:
+                        radial-gradient(
+                            circle,
+                            rgb(255, 107, 107) 2px,
+                            transparent 2px
+                        );
+                    background-size: 10px 10px;
+                "
+            ></div>
+        </div>
+
+
+        {# Contenu #}
+        <div class="relative z-10 max-w-5xl mx-auto">
+
+            <div class="inline-flex items-center gap-2 bg-white border border-[rgba(45,45,45,0.1)] rounded-full px-4 py-1.5 text-xs font-medium text-[#6B6B6B] mb-6 shadow-sm">
+                <span>🌿</span>
+                Mon espace
+            </div>
+
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+
+                <div>
+                    <h1 class="font-title text-5xl sm:text-6xl font-semibold text-[#2D2D2D] leading-tight mb-3">
+                        Bonjour
+                        {% if app.user and app.user.firstname %}
+                            {{ app.user.firstname }}
+                        {% endif %}
+                        👋
+                    </h1>
+
+                    <p class="text-[#6B6B6B] text-lg max-w-xl leading-relaxed">
+                        Retrouvez ici vos listes et préparez tranquillement
+                        l'arrivée de bébé.
+                    </p>
+                </div>
+
+
+                {# Bouton création #}
+                <a
+                    href="{{ path('app_wishlist_create', {
+                        step: 'family'
+                    }) }}"
+                    class="inline-flex items-center justify-center gap-2 bg-[#FF6B6B] text-white text-sm font-semibold px-5 py-3 rounded-full hover:bg-[#e85555] active:scale-95 transition shadow-sm"
+                >
+                    <span class="text-lg leading-none">
+                        +
+                    </span>
+
+                    Créer une liste
+                </a>
+
+            </div>
+        </div>
+
+    </header>
+
+
+    {# ====================================================== #}
+    {# CONTENU                                                #}
+    {# ====================================================== #}
+
+    <main class="max-w-5xl mx-auto px-6 py-10 pb-20">
+
+        {# Titre de section #}
+        <div class="flex items-center justify-between gap-4 mb-6">
+            <div>
+                <h2 class="font-title text-3xl font-semibold text-[#2D2D2D]">
+                    Mes listes
+                </h2>
+
+                <p class="text-sm text-[#6B6B6B] mt-1">
+                    {{ wishlists|length }}
+                    {{ wishlists|length > 1 ? 'listes' : 'liste' }}
+                </p>
+            </div>
+        </div>
+
+
+        {# ================================================== #}
+        {# LISTES                                             #}
+        {# ================================================== #}
+
+        {% if wishlists|length > 0 %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                {% for wishlist in wishlists %}
+
+                    <article class="relative overflow-hidden bg-white border border-[rgba(45,45,45,0.08)] rounded-2xl p-6 shadow-sm hover:shadow-md hover:-translate-y-1 transition">
+
+                        {# Petit élément décoratif #}
+                        <div class="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-[#FFE66D] opacity-30"></div>
+
+
+                        <div class="relative z-10">
+
+                            {# En-tête carte #}
+                            <div class="flex items-start justify-between gap-4 mb-5">
+
+                                <div>
+
+                                    <div class="inline-flex items-center gap-2 text-xs font-semibold text-[#4ECDC4] bg-[#4ECDC4]/10 rounded-full px-3 py-1 mb-3">
+                                        👶 Liste de naissance
+                                    </div>
+
+
+                                    <h3 class="font-title text-2xl font-semibold text-[#2D2D2D]">
+                                        {{ wishlist.name }}
+                                    </h3>
+
+
+                                    {% if wishlist.parentsNames %}
+                                        <p class="text-sm text-[#6B6B6B] mt-1">
+                                            {{ wishlist.parentsNames }}
+                                        </p>
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+
+                            {# Informations principales #}
+                            <div class="grid grid-cols-2 gap-3 mb-6">
+
+                                <div class="rounded-xl bg-[#FFF8F0] px-4 py-3">
+                                    <div class="text-xs text-[#6B6B6B] mb-1">
+                                        Souhaits
+                                    </div>
+
+                                    <div class="font-title text-2xl font-semibold text-[#2D2D2D]">
+                                        {{ wishlist.products|length }}
+                                    </div>
+                                </div>
+
+
+                                <div class="rounded-xl bg-[#4ECDC4]/10 px-4 py-3">
+                                    <div class="text-xs text-[#6B6B6B] mb-1">
+                                        Arrivée prévue
+                                    </div>
+
+                                    <div class="text-sm font-semibold text-[#2D2D2D]">
+                                        {% if wishlist.dueDate %}
+                                            {{ wishlist.dueDate|date('d/m/Y') }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                            {# Prénom du bébé #}
+                            {% if wishlist.babyName %}
+
+                                <div class="flex items-center gap-2 text-sm text-[#6B6B6B] mb-5">
+                                    <span>🧸</span>
+
+                                    Pour l'arrivée de
+
+                                    <strong class="text-[#2D2D2D]">
+                                        {{ wishlist.babyName }}
+                                    </strong>
+                                </div>
+
+                            {% endif %}
+
+
+                            {# Message #}
+                            {% if wishlist.message %}
+
+                                <p class="text-sm text-[#6B6B6B] leading-relaxed mb-6 line-clamp-2">
+                                    {{ wishlist.message }}
+                                </p>
+
+                            {% endif %}
+
+
+                            {# Footer carte #}
+                            <div class="flex items-center justify-between gap-3 pt-5 border-t border-[rgba(45,45,45,0.08)]">
+
+                                <span class="text-xs text-[#6B6B6B]">
+                                    Créée le
+                                    {{ wishlist.createdAt|date('d/m/Y') }}
+                                </span>
+
+
+                                <a
+                                    href="{{ path('app_wishlist', {
+                                        token: wishlist.accessToken
+                                    }) }}"
+                                    class="inline-flex items-center gap-2 bg-[#4ECDC4] text-white text-sm font-semibold px-5 py-2 rounded-full hover:opacity-90 active:scale-95 transition"
+                                >
+                                    Ouvrir
+
+                                    <span aria-hidden="true">
+                                        →
+                                    </span>
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                {% endfor %}
+
+            </div>
+
+
+        {% else %}
+
+            {# ================================================== #}
+            {# AUCUNE LISTE                                       #}
+            {# ================================================== #}
+
+            <div class="relative overflow-hidden text-center bg-[#FFF8F0] border border-[rgba(45,45,45,0.08)] rounded-2xl px-6 py-16">
+
+                <div class="absolute -top-10 -right-10 w-36 h-36 rounded-full bg-[#C7B8EA] opacity-25"></div>
+
+
+                <div class="relative z-10 max-w-md mx-auto">
+
+                    <div class="text-5xl mb-5">
+                        🎁
+                    </div>
+
+
+                    <h2 class="font-title text-3xl font-semibold text-[#2D2D2D] mb-3">
+                        Votre première liste vous attend
+                    </h2>
+
+
+                    <p class="text-[#6B6B6B] leading-relaxed mb-7">
+                        Créez votre liste de naissance et partagez vos envies
+                        avec vos proches.
+                    </p>
+
+
+                    <a
+                        href="{{ path('app_wishlist_create', {
+                            step: 'family'
+                        }) }}"
+                        class="inline-flex items-center gap-2 bg-[#FF6B6B] text-white font-semibold px-6 py-3 rounded-full hover:bg-[#e85555] active:scale-95 transition shadow-sm"
+                    >
+                        <span class="text-lg">
+                            +
+                        </span>
+
+                        Créer ma première liste
+                    </a>
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+    </main>
+
+{% endblock %}
+

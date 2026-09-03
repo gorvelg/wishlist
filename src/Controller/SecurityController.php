@@ -58,19 +58,7 @@ class SecurityController extends AbstractController
         if (!$redirect) {
             return false;
         }
-
-        /*
-         * On accepte uniquement les URLs internes :
-         *
-         * /
-         * /wishlist/xxx
-         * /profile
-         *
-         * mais jamais :
-         *
-         * https://site-pirate.com
-         * //site-pirate.com
-         */
+        
         return str_starts_with($redirect, '/')
             && !str_starts_with($redirect, '//')
             && !str_contains($redirect, '\\');
