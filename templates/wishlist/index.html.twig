@@ -21,7 +21,7 @@
                 {{ wishlist.name }}
             </h1>
             <p class="text-[#6B6B6B] text-lg max-w-md mx-auto leading-relaxed">
-                Nous vous remercions pour votre présence ! Choisissez l'article que vous souhaitez dans notre liste afin de nous aider à accueillir ce petit être dans ce monde !
+                {{ wishlist.message }}
             </p>
             <div class="flex items-center justify-center gap-6 mt-8"><div class="text-center">
                     <div class="font-title text-3xl font-semibold text-[#2D2D2D]">{{ countProducts }}</div>
@@ -69,32 +69,47 @@
     </div>
 
     <main class="max-w-5xl mx-auto px-6 pb-20">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+        <div data-products-container class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
             {% for product in products %}
 
                 {% set hasReserved = app.user
-                    and (product.productUsers|filter(
+                    and (
+                    product.productUsers|filter(
                     productUser => productUser.user.id == app.user.id
-                )|length > 0)
+                )|length > 0
+                    )
                 %}
 
-                {% include 'components/_product-card.html.twig' with {
-                    productId: product.id,
-                    name: product.name,
-                    description: product.description,
-                    status: product.status,
-                    image: product.image,
-                    price: product.price,
-                    url: product.url,
-                    category: product.category,
-                    wishlistToken: wishlist.accessToken,
-                    productUsers: product.productUsers,
-                    hasReserved: hasReserved,
-                    isOwner: isOwner
-                } only %}
+                <div
+                    data-product-item
+                    data-product-category="{{ product.category.value }}"
+                    data-product-status="{{ product.status.value }}"
+                    data-product-price="{{ product.price }}"
+                >
+
+                    {% include 'components/_product-card.html.twig' with {
+                        productId: product.id,
+                        name: product.name,
+                        description: product.description,
+                        status: product.status,
+                        image: product.image,
+                        price: product.price,
+                        url: product.url,
+                        category: product.category,
+                        wishlistToken: wishlist.accessToken,
+                        productUsers: product.productUsers,
+                        hasReserved: hasReserved,
+                        isOwner: isOwner
+                    } only %}
+
+                </div>
 
             {% endfor %}
+
         </div>
+
     </main>
 </div>
 {% endblock %}

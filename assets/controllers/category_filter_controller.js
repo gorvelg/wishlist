@@ -3,33 +3,155 @@ import { Controller } from '@hotwired/stimulus';
 export default class extends Controller {
     connect() {
         const buttons = this.element.querySelectorAll('[data-filter-category]');
-        const products = this.element.querySelectorAll('[data-product-category]');
         const availableCheckbox = this.element.querySelector('[data-available-filter]');
+        const priceSort = this.element.querySelector('[data-price-sort]');
+        const productsContainer = this.element.querySelector('[data-products-container]');
+
+        if (!productsContainer) {
+            console.error('Conteneur produits introuvable.');
+            return;
+        }
+
+        /*
+         * IMPORTANT :
+         *
+         * On récupère uniquement les éléments produits.
+         * Un élément HTML = un produit.
+         */
+        const products = Array.from(
+            productsContainer.querySelectorAll('[data-product-item]')
+        );
 
         let selectedCategory = 'all';
 
+
+        /*
+         * On mémorise l'ordre initial.
+         */
+        products.forEach((product, index) => {
+            product.dataset.originalIndex = index;
+        });
+
+
+        /*
+         * =============================================
+         * RÉCUPÉRER LE PRIX
+         * =============================================
+         */
+
+        const getPrice = (product) => {
+            const value = product.dataset.productPrice || '0';
+
+            /*
+             * Exemples acceptés :
+             *
+             * 19.90
+             * 19,90
+             * 1 299,90
+             */
+            const normalized = value
+                .replace(/\s/g, '')
+                .replace(',', '.');
+
+            const price = Number(normalized);
+
+            return Number.isNaN(price)
+                ? 0
+                : price;
+        };
+
+
+        /*
+         * =============================================
+         * FILTRER
+         * =============================================
+         */
+
         const filterProducts = () => {
-            const onlyAvailable = availableCheckbox?.checked ?? false;
+            const onlyAvailable = availableCheckbox?.checked || false;
 
             products.forEach((product) => {
-                const productCategory = product.dataset.productCategory;
-                const productStatus = product.dataset.productStatus;
+                const category = product.dataset.productCategory;
+                const status = product.dataset.productStatus;
 
                 const matchesCategory =
                     selectedCategory === 'all'
-                    || productCategory === selectedCategory;
+                    || category === selectedCategory;
 
                 const matchesStatus =
                     !onlyAvailable
-                    || productStatus === 'available';
+                    || status === 'available';
 
-                if (matchesCategory && matchesStatus) {
-                    product.classList.remove('hidden');
-                } else {
-                    product.classList.add('hidden');
-                }
+                /*
+                 * hidden = display:none
+                 *
+                 * Comme on cache le wrapper entier,
+                 * la grille se réorganise sans trous.
+                 */
+                product.classList.toggle(
+                    'hidden',
+                    !(matchesCategory && matchesStatus)
+                );
             });
         };
+
+
+        /*
+         * =============================================
+         * TRIER
+         * =============================================
+         */
+
+        const sortProducts = () => {
+            const selectedSort = priceSort?.value || 'default';
+
+            products.sort((a, b) => {
+                /*
+                 * Ordre par défaut.
+                 */
+                if (selectedSort === 'default') {
+                    return (
+                        Number(a.dataset.originalIndex)
+                        - Number(b.dataset.originalIndex)
+                    );
+                }
+
+                const priceA = getPrice(a);
+                const priceB = getPrice(b);
+
+                /*
+                 * Petit prix → gros prix.
+                 */
+                if (selectedSort === 'price-asc') {
+                    return priceA - priceB;
+                }
+
+                /*
+                 * Gros prix → petit prix.
+                 */
+                if (selectedSort === 'price-desc') {
+                    return priceB - priceA;
+                }
+
+                return 0;
+            });
+
+
+            /*
+             * On remet les éléments dans la grille
+             * dans leur nouvel ordre.
+             */
+            products.forEach((product) => {
+                productsContainer.appendChild(product);
+            });
+        };
+
+
+        /*
+         * =============================================
+         * STYLE CATÉGORIE ACTIVE
+         * =============================================
+         */
 
         const setActiveButton = (activeButton) => {
             buttons.forEach((button) => {
@@ -59,6 +181,13 @@ export default class extends Controller {
             );
         };
 
+
+        /*
+         * =============================================
+         * ÉVÉNEMENTS
+         * =============================================
+         */
+
         buttons.forEach((button) => {
             button.addEventListener('click', () => {
                 selectedCategory = button.dataset.filterCategory;
@@ -68,8 +197,14 @@ export default class extends Controller {
             });
         });
 
+
         availableCheckbox?.addEventListener('change', () => {
             filterProducts();
+        });
+
+
+        priceSort?.addEventListener('change', () => {
+            sortProducts();
         });
     }
 }
