@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\ProductUserRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ProductUserRepository::class)]
@@ -25,6 +26,14 @@ class ProductUser
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(
+        type: Types::DECIMAL,
+        precision: 8,
+        scale: 2,
+        nullable: true
+    )]
+    private ?string $amount = null;
 
     public function __construct()
     {
@@ -70,6 +79,17 @@ class ProductUser
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+    public function getAmount(): ?string
+    {
+        return $this->amount;
+    }
+
+    public function setAmount(?string $amount): static
+    {
+        $this->amount = $amount;
 
         return $this;
     }

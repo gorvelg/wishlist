@@ -475,12 +475,18 @@ final class WishlistController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
     ): Response {
-
         $this->denyAccessUnlessGranted(
             'IS_AUTHENTICATED_FULLY'
         );
 
         $user = $this->getUser();
+
+
+        /*
+         * ===============================================
+         * VÉRIFICATION DU PRODUIT
+         * ===============================================
+         */
 
         if (
             $product->getWishlist()?->getAccessToken()
@@ -488,6 +494,13 @@ final class WishlistController extends AbstractController
         ) {
             throw $this->createNotFoundException();
         }
+
+
+        /*
+         * ===============================================
+         * CSRF
+         * ===============================================
+         */
 
         if (
             !$this->isCsrfTokenValid(
@@ -500,13 +513,20 @@ final class WishlistController extends AbstractController
             );
         }
 
+
+        /*
+         * ===============================================
+         * PRODUIT DÉJÀ ACHETÉ
+         * ===============================================
+         */
+
         if (
             $product->getStatus()
             === ProductStatus::PURCHASED
         ) {
             $this->addFlash(
                 'error',
-                'Ce produit a déjà été offert.'
+                'Ce cadeau a déjà été acheté.'
             );
 
             return $this->redirectToRoute(
@@ -517,42 +537,127 @@ final class WishlistController extends AbstractController
             );
         }
 
-        $existingProductUser = $em
+
+        /*
+         * ===============================================
+         * RÉCUPÉRATION DU MONTANT
+         * ===============================================
+         */
+
+        $rawAmount = trim(
+            (string) $request->request->get('amount')
+        );
+
+        /*
+         * Permet aussi :
+         *
+         * 50,00
+         *
+         * au lieu de seulement :
+         *
+         * 50.00
+         */
+        $rawAmount = str_replace(
+            ',',
+            '.',
+            $rawAmount
+        );
+
+
+        if (
+            !is_numeric($rawAmount)
+            || (float) $rawAmount <= 0
+        ) {
+            $this->addFlash(
+                'error',
+                'Le montant de la participation est invalide.'
+            );
+
+            return $this->redirectToRoute(
+                'app_wishlist',
+                [
+                    'token' => $token,
+                ]
+            );
+        }
+
+
+        $amount = round(
+            (float) $rawAmount,
+            2
+        );
+
+
+        /*
+         * ===============================================
+         * PARTICIPATION EXISTANTE ?
+         * ===============================================
+         */
+
+        $productUser = $em
             ->getRepository(ProductUser::class)
             ->findOneBy([
                 'product' => $product,
                 'user' => $user,
             ]);
 
-        if ($existingProductUser !== null) {
 
-            $product->removeProductUser(
-                $existingProductUser
-            );
+        /*
+         * ===============================================
+         * CALCUL DU MONTANT DISPONIBLE
+         * ===============================================
+         *
+         * Important lorsqu'on MODIFIE une participation.
+         *
+         * Exemple :
+         *
+         * cadeau = 500 €
+         *
+         * moi = 50 €
+         * autres = 200 €
+         *
+         * je dois pouvoir modifier mes 50 €
+         * jusqu'à 300 € maximum.
+         */
 
-            $em->remove(
-                $existingProductUser
-            );
+        $otherContributions = 0.0;
+
+        foreach ($product->getProductUsers() as $participation) {
 
             if (
-                $product
-                    ->getProductUsers()
-                    ->isEmpty()
+                $productUser !== null
+                && $participation->getId()
+                === $productUser->getId()
             ) {
-                $product->setStatus(
-                    ProductStatus::AVAILABLE
-                );
-            } else {
-                $product->setStatus(
-                    ProductStatus::BUYING
-                );
+                continue;
             }
 
-            $em->flush();
+            $otherContributions +=
+                (float) ($participation->getAmount() ?? 0);
+        }
+
+
+        $maxAmount = max(
+            0,
+            (float) $product->getPrice()
+            - $otherContributions
+        );
+
+
+        /*
+         * ===============================================
+         * EMPÊCHER DE DÉPASSER LE PRIX
+         * ===============================================
+         */
+
+        if ($amount > $maxAmount) {
 
             $this->addFlash(
-                'success',
-                'Votre participation a été annulée.'
+                'error',
+                sprintf(
+                    'Vous pouvez participer au maximum à hauteur de %.2f €.',
+                    $maxAmount
+                )
             );
 
             return $this->redirectToRoute(
@@ -563,27 +668,60 @@ final class WishlistController extends AbstractController
             );
         }
 
-        $productUser = new ProductUser();
 
-        $productUser
-            ->setProduct($product)
-            ->setUser($user);
+        /*
+         * ===============================================
+         * CRÉATION
+         * ===============================================
+         */
+
+        if ($productUser === null) {
+
+            $productUser = new ProductUser();
+
+            $productUser
+                ->setProduct($product)
+                ->setUser($user);
+
+            $em->persist(
+                $productUser
+            );
+        }
 
 
+        /*
+         * ===============================================
+         * MONTANT
+         * ===============================================
+         */
+
+        $productUser->setAmount(
+            number_format(
+                $amount,
+                2,
+                '.',
+                ''
+            )
+        );
+
+
+        /*
+         * À partir du moment où quelqu'un participe,
+         * le cadeau est en cours.
+         */
         $product->setStatus(
             ProductStatus::BUYING
         );
 
-        $em->persist(
-            $productUser
-        );
 
         $em->flush();
 
+
         $this->addFlash(
             'success',
-            'Vous participez maintenant à ce cadeau.'
+            'Votre participation a bien été enregistrée.'
         );
+
 
         return $this->redirectToRoute(
             'app_wishlist',
@@ -593,6 +731,108 @@ final class WishlistController extends AbstractController
         );
     }
 
+    #[Route(
+        '/wishlist/{token}/product/{id}/participation/cancel',
+        name: 'app_product_cancel_participation',
+        methods: ['POST']
+    )]
+    public function cancelParticipation(
+        string $token,
+        Product $product,
+        Request $request,
+        EntityManagerInterface $em,
+    ): Response {
+        $this->denyAccessUnlessGranted(
+            'IS_AUTHENTICATED_FULLY'
+        );
+
+        $user = $this->getUser();
+
+
+        if (
+            $product->getWishlist()?->getAccessToken()
+            !== $token
+        ) {
+            throw $this->createNotFoundException();
+        }
+
+
+        if (
+            !$this->isCsrfTokenValid(
+                'cancel-participation-' . $product->getId(),
+                (string) $request->request->get('_token')
+            )
+        ) {
+            throw $this->createAccessDeniedException(
+                'Jeton CSRF invalide.'
+            );
+        }
+
+
+        $productUser = $em
+            ->getRepository(ProductUser::class)
+            ->findOneBy([
+                'product' => $product,
+                'user' => $user,
+            ]);
+
+
+        if ($productUser === null) {
+
+            $this->addFlash(
+                'error',
+                'Vous ne participez pas à ce cadeau.'
+            );
+
+            return $this->redirectToRoute(
+                'app_wishlist',
+                [
+                    'token' => $token,
+                ]
+            );
+        }
+
+
+        $product->removeProductUser(
+            $productUser
+        );
+
+        $em->remove(
+            $productUser
+        );
+
+
+        /*
+         * Plus aucun participant :
+         * le cadeau redevient disponible.
+         */
+        if (
+            $product
+                ->getProductUsers()
+                ->isEmpty()
+        ) {
+            $product->setStatus(
+                ProductStatus::AVAILABLE
+            );
+        }
+
+
+        $em->flush();
+
+
+        $this->addFlash(
+            'success',
+            'Votre participation a été annulée.'
+        );
+
+
+        return $this->redirectToRoute(
+            'app_wishlist',
+            [
+                'token' => $token,
+            ]
+        );
+    }
     #[Route(
         '/wishlist/{token}/product/{id}/purchased',
         name: 'app_product_mark_purchased',

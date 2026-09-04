@@ -227,4 +227,42 @@ class Product
 
         return $this;
     }
+    public function getContributedAmount(): float
+    {
+        $total = 0.0;
+
+        foreach ($this->productUsers as $productUser) {
+            $total += (float) ($productUser->getAmount() ?? 0);
+        }
+
+        return round($total, 2);
+    }
+
+    public function getRemainingAmount(): float
+    {
+        return max(
+            0,
+            round(
+                (float) $this->price - $this->getContributedAmount(),
+                2
+            )
+        );
+    }
+
+    public function getContributionPercent(): float
+    {
+        $price = (float) $this->price;
+
+        if ($price <= 0) {
+            return 0;
+        }
+
+        return min(
+            100,
+            round(
+                ($this->getContributedAmount() / $price) * 100,
+                1
+            )
+        );
+    }
 }
