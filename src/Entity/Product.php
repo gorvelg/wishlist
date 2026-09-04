@@ -69,6 +69,8 @@ class Product
         $now = new \DateTimeImmutable();
         $this->createdAt = $now;
         $this->updatedAt = $now;
+
+        $this->status = ProductStatus::AVAILABLE;
     }
 
     public function getId(): ?int

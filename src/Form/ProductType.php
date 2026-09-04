@@ -95,17 +95,7 @@ class ProductType extends AbstractType
                     'class' => $labelClass,
                 ],
             ])
-            ->add('status', EnumType::class, [
-                'label' => 'Statut',
-                'class' => ProductStatus::class,
-                'choice_label' => fn (ProductStatus $status) => $status->toFrench(),
-                'attr' => [
-                    'class' => $inputClass . ' capitalize',
-                ],
-                'label_attr' => [
-                    'class' => $labelClass,
-                ],
-            ])
+
             ->add('description', TextareaType::class, [
                 'label' => 'Note',
                 'required' => false,
