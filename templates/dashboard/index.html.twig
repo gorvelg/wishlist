@@ -145,7 +145,7 @@
                         <div class="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-[#FFE66D] opacity-30"></div>
 
 
-                        <div class="relative z-10">
+                        <div class="relative z-10 flex flex-col justify-between h-full">
 
                             {# En-tête carte #}
                             <div class="flex items-start justify-between gap-4 mb-5">
@@ -237,20 +237,51 @@
                                     Créée le
                                     {{ wishlist.createdAt|date('d/m/Y') }}
                                 </span>
-
-
-                                <a
-                                    href="{{ path('app_wishlist', {
-                                        token: wishlist.accessToken
-                                    }) }}"
-                                    class="inline-flex items-center gap-2 bg-[#4ECDC4] text-white text-sm font-semibold px-5 py-2 rounded-full hover:opacity-90 active:scale-95 transition"
+                                <div
+                                    class="flex gap-2"
                                 >
-                                    Ouvrir
+                                    <button
+                                        type="button"
+                                        data-controller="share"
+                                        data-share-url-value="{{ url('app_wishlist', {
+                                            token: wishlist.accessToken
+                                        }) }}"
+                                        data-action="click->share#copy"
+                                        class="inline-flex items-center gap-2 bg-[#4ECDC4] text-white text-sm font-semibold px-5 py-2 rounded-full hover:opacity-90 transition"
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                            class="w-4 h-4"
+                                        >
+                                            <circle cx="18" cy="5" r="3"/>
+                                            <circle cx="6" cy="12" r="3"/>
+                                            <circle cx="18" cy="19" r="3"/>
+                                            <path d="m8.6 13.5 6.8 4"/>
+                                            <path d="m15.4 6.5-6.8 4"/>
+                                        </svg>
 
-                                    <span aria-hidden="true">
+                                        Partager
+                                    </button>
+
+
+                                    <a
+                                        href="{{ path('app_wishlist', {
+                                            token: wishlist.accessToken
+                                        }) }}"
+                                        class="inline-flex items-center gap-2 bg-[#4ECDC4] text-white text-sm font-semibold px-5 py-2 rounded-full hover:opacity-90 active:scale-95 transition"
+                                    >
+                                        Ouvrir
+
+                                        <span aria-hidden="true">
                                         →
                                     </span>
-                                </a>
+                                    </a>
+                                </div>
+
 
                             </div>
 

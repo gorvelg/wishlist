@@ -15,6 +15,10 @@ final class DashboardController extends AbstractController
     ): Response
     {
         $user = $this->getUser();
+
+        if (!$user){
+            return $this->redirectToRoute('app_login');
+        }
         $wishlists = $user
             ->getWishlistOwners()
             ->map(
@@ -22,7 +26,7 @@ final class DashboardController extends AbstractController
                 $wishlistOwner->getWishlist()
             );
 
-        dump($wishlists);
+
 
         return $this->render('dashboard/index.html.twig', [
             'wishlists' => $wishlists,
