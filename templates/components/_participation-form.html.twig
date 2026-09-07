@@ -21,7 +21,7 @@
             value="{{ csrf_token('purchase-' ~ productId) }}"
         >
 
-        <label class="text-xs font-medium text-[#6B6B6B] mb-1 block">
+        <label class="sr-only">
             {% if myParticipation %}
                 Modifier ma participation
             {% else %}
@@ -41,7 +41,7 @@
                     value="{{ myParticipation ? myParticipation.amount : '' }}"
                     placeholder="50"
                     required
-                    class="w-full rounded-xl border border-[rgba(45,45,45,0.15)] px-3 py-1.5 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/40"
+                    class="w-full rounded-xl bg-white border border-[rgba(45,45,45,0.15)] px-3 py-1.5 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/40"
                 >
 
                 <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#6B6B6B]">
@@ -52,7 +52,7 @@
 
             <button
                 type="submit"
-                class="flex items-center gap-1 text-xs font-semibold text-white bg-[#4ECDC4] hover:bg-[#3ab8b0] active:scale-95 transition px-3 py-1.5 rounded-lg"
+                class="text-xs font-semibold px-3.5 py-1.5 rounded-lg bg-[#FFE66D] text-[#2D2D2D] hover:bg-[#ffd93d] active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
             >
                 {% if myParticipation %}
                     Modifier
