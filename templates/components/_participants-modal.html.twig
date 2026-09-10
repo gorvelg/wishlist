@@ -1,0 +1,142 @@
+<div data-controller="participants">
+
+    {# ========================================================== #}
+    {# LIEN VOIR LES PARTICIPANTS                                #}
+    {# ========================================================== #}
+    <span class="text-xs font-medium text-[#6B6B6B]">
+            {{ productUsers|length }}
+        {% if productUsers|length > 1 %}
+            participants
+        {% else %}
+            participant
+        {% endif %}
+        </span>
+
+    <span>-</span>
+    <button type="button" data-action="click->participants#open" class="inline-flex items-center gap-1 text-xs font-medium text-[#6B6B6B] hover:text-[#2D2D2D] hover:underline transition">
+        <span>
+            Voir les participants
+        </span>
+    </button>
+
+
+    {# ========================================================== #}
+    {# MODALE                                                    #}
+    {# ========================================================== #}
+
+    <div data-participants-target="modal" data-action="click->participants#closeBackground keydown.esc@window->participants#close" class="hidden fixed inset-0 z-50 bg-black/30 backdrop-blur-[1px] flex items-center justify-center p-4">
+
+        <div role="dialog" aria-modal="true" aria-labelledby="participants-title-{{ productId }}" class="relative w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden">
+
+
+            {# ====================================================== #}
+            {# HEADER                                                #}
+            {# ====================================================== #}
+
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[rgba(45,45,45,0.08)]">
+
+                <div>
+
+                    <h2 id="participants-title-{{ productId }}" class="font-semibold text-[#2D2D2D]">
+                        Participants
+                    </h2>
+
+                    <p class="text-xs text-[#6B6B6B] mt-0.5">
+                        {{ productUsers|length }}
+                        {% if productUsers|length > 1 %}
+                            personnes participent
+                        {% else %}
+                            personne participe
+                        {% endif %}
+                        à ce cadeau
+                    </p>
+
+                </div>
+
+
+                <button type="button" data-action="click->participants#close" aria-label="Fermer la fenêtre des participants" class="flex items-center justify-center size-8 rounded-full text-[#6B6B6B] hover:text-[#2D2D2D] hover:bg-[#FFF8F0] transition">
+                    ✕
+                </button>
+
+            </div>
+
+
+            {# ====================================================== #}
+            {# PARTICIPANTS                                          #}
+            {# ====================================================== #}
+
+            <div class="px-5 py-3">
+
+                {% set badgeColors = [
+                    'bg-red-100 text-red-700',
+                    'bg-blue-100 text-blue-700',
+                    'bg-green-100 text-green-700',
+                    'bg-yellow-100 text-yellow-700',
+                    'bg-purple-100 text-purple-700',
+                    'bg-pink-100 text-pink-700',
+                    'bg-orange-100 text-orange-700',
+                    'bg-teal-100 text-teal-700'
+                ] %}
+
+
+                {% for productUser in productUsers %}
+
+                    {% set user = productUser.user %}
+                    {% set color = badgeColors[user.id % badgeColors|length] %}
+
+                    <div class="flex items-center gap-3 py-3 {% if not loop.last %}border-b border-[rgba(45,45,45,0.06)]{% endif %}">
+
+                        <span class="flex items-center justify-center size-9 rounded-full text-xs font-semibold shrink-0 {{ color }}">
+                            {{ user.initials }}
+                        </span>
+
+
+                        <div class="flex-1 min-w-0">
+
+                            <p class="text-sm font-medium text-[#2D2D2D] truncate">
+                                {{ user.firstname }}
+
+                                {% if user.lastname %}
+                                    {{ user.lastname|slice(0, 1)|upper }}.
+                                {% endif %}
+                            </p>
+
+                        </div>
+
+
+                        {% if productUser.amount %}
+
+                            <span class="text-sm font-semibold text-[#2D2D2D] shrink-0">
+                                {{ productUser.amount|number_format(2, ',', ' ') }} €
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            {# ====================================================== #}
+            {# TOTAL                                                 #}
+            {# ====================================================== #}
+
+            <div class="flex items-center justify-between px-5 py-4 bg-[#FFF8F0] border-t border-[rgba(45,45,45,0.08)]">
+
+                <span class="text-xs font-medium text-[#6B6B6B]">
+                    Total des participations
+                </span>
+
+                <span class="text-sm font-semibold text-[#2D2D2D]">
+                    {{ contributedAmount|number_format(2, ',', ' ') }} €
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

@@ -53,6 +53,9 @@ class Product
     #[ORM\JoinColumn(nullable: false)]
     private ?Wishlist $wishlist = null;
 
+    #[ORM\Column(options: ['default' => false])]
+    private bool $collaborative = false;
+
     #[Assert\Length(
         min: 2,
         max: 200,
@@ -264,5 +267,15 @@ class Product
                 1
             )
         );
+    }
+
+    public function isCollaborative(): bool
+    {
+        return $this->collaborative;
+    }
+
+    public function setCollaborative(bool $collaborative): void
+    {
+        $this->collaborative = $collaborative;
     }
 }

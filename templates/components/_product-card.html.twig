@@ -13,11 +13,6 @@
                 <span>Cadeau acheté</span>
             </div>
 
-            {# ================================================== #}
-            {# ANNULER LE STATUT ACHETÉ                          #}
-            {# uniquement pour un participant                    #}
-            {# ================================================== #}
-
             {% if app.user and hasReserved %}
 
                 <form action="{{ path('app_product_cancel_purchased', {token: wishlistToken, id: productId}) }}" method="post">
@@ -42,6 +37,7 @@
     {# ========================================================== #}
 
     <div class="h-36 w-full overflow-hidden relative">
+
 
         {# ====================================================== #}
         {# ACTIONS PROPRIÉTAIRE                                  #}
@@ -92,9 +88,6 @@
 
         {% endif %}
 
-
-        {# Dégradé sur le bas de l'image #}
-
         <div class="absolute inset-0" style="background: linear-gradient(transparent 40%, rgba(0, 0, 0, 0.18) 100%);"></div>
 
         <div class="absolute bottom-0 left-0 h-1 w-full" style="background: rgb(255, 154, 92);"></div>
@@ -117,7 +110,7 @@
 
 
         {# ====================================================== #}
-        {# PARTICIPANTS                                          #}
+        {# AVATARS PARTICIPANTS                                  #}
         {# ====================================================== #}
 
         {% if productUsers|length > 0 %}
@@ -143,7 +136,7 @@
 
 
     {# ========================================================== #}
-    {# CONTENU DE LA CARTE                                       #}
+    {# CONTENU                                                   #}
     {# ========================================================== #}
 
     <div class="p-5 flex flex-col gap-4 flex-1 bg-white">
@@ -169,10 +162,6 @@
             </div>
 
 
-            {# ================================================== #}
-            {# DESCRIPTION                                       #}
-            {# ================================================== #}
-
             {% if description is not null and description != '' %}
 
                 <p class="text-xs text-[#6B6B6B] mt-2 leading-relaxed">
@@ -194,83 +183,307 @@
 
 
         {# ====================================================== #}
-        {# PROGRESSION DES PARTICIPATIONS                        #}
+        {# PRODUIT ENCORE LIBRE                                  #}
+        {# OFFRIR / OFFRIR À PLUSIEURS                           #}
         {# ====================================================== #}
 
-        <div class="rounded-xl bg-[#FFF8F0] border border-[rgba(45,45,45,0.08)] px-3.5 py-3 flex flex-col gap-0">
+        {% if status.value != 'purchased' and not collaborative and productUsers|length == 0 %}
 
-            <div>
-                <div class="flex items-center justify-between text-xs text-[#6B6B6B] mb-2">
+            {% if app.user %}
 
-                <span>
-                    {{ contributedAmount|number_format(2, ',', ' ') }} € promis
-                </span>
+                <div data-controller="participation">
 
-                    <span>
-                    {{ contributionPercent|number_format(0) }} %
-                </span>
+
+                    {# ================================================== #}
+                    {# CHOIX INITIAL                                     #}
+                    {# ================================================== #}
+
+                    <div data-participation-target="choices" class="flex items-center gap-2">
+
+
+                        {# ================================================== #}
+                        {# OFFRIR                                             #}
+                        {# ================================================== #}
+
+                        <form method="post" action="{{ path('app_product_offer', {token: wishlistToken, id: productId}) }}" class="flex-1">
+
+                            <input type="hidden" name="_token" value="{{ csrf_token('offer-' ~ productId) }}">
+
+                            <button type="submit" class="w-full text-xs font-semibold px-3.5 py-2 rounded-lg bg-[#FFE66D] text-[#2D2D2D] hover:bg-[#ffd93d] active:scale-95 transition">
+                                Offrir
+                            </button>
+
+                        </form>
+
+
+                        {# ================================================== #}
+                        {# OFFRIR À PLUSIEURS                                #}
+                        {# Affiche seulement le formulaire                   #}
+                        {# ================================================== #}
+
+                        <button type="button" data-action="click->participation#showForm" class="flex-1 text-xs font-semibold px-3.5 py-2 rounded-lg bg-[#FFF8F0] border border-[rgba(45,45,45,0.12)] text-[#2D2D2D] hover:bg-[#FFE66D] active:scale-95 transition">
+                            Offrir à plusieurs
+                        </button>
+
+                    </div>
+
+
+                    {# ================================================== #}
+                    {# PREMIÈRE PARTICIPATION                            #}
+                    {# ================================================== #}
+
+                    <div data-participation-target="form" class="hidden">
+
+                        {% include 'components/_participation-form.html.twig' with {
+                            productId: productId,
+                            status: status,
+                            wishlistToken: wishlistToken,
+                            productUsers: productUsers
+                        } only %}
+
+                        <button type="button" data-action="click->participation#hideForm" class="text-xs text-[#6B6B6B] hover:text-[#2D2D2D] hover:underline mt-2">
+                            Annuler
+                        </button>
+
+                    </div>
 
                 </div>
 
 
-                <div class="h-2 w-full rounded-full bg-[rgba(45,45,45,0.08)] overflow-hidden">
+                {# ====================================================== #}
+                {# UTILISATEUR NON CONNECTÉ                             #}
+                {# ====================================================== #}
 
-                    <div class="h-full rounded-full transition-all duration-500" style="width: {{ contributionPercent }}%; background: linear-gradient(90deg, rgb(255, 230, 109), rgb(255, 154, 92));"></div>
+            {% else %}
 
-                </div>
+                <div class="flex items-center gap-2">
 
-
-                {% if remainingAmount > 0 %}
-
-                    <div class="text-xs text-[#6B6B6B] mt-2">
-                        Il reste
-                        <strong class="text-[#2D2D2D]">
-                            {{ remainingAmount|number_format(2, ',', ' ') }} €
-                        </strong>
-                        à financer
-                    </div>
-
-                {% else %}
-
-                    <div class="flex items-center gap-1 text-xs font-semibold text-[#4ECDC4] mt-2">
-                        <span>✓</span>
-                        <span>Montant entièrement réparti</span>
-                    </div>
-
-                {% endif %}
-            </div>
-
-
-
-            {# ====================================================== #}
-            {# PARTICIPATION                                         #}
-            {# ====================================================== #}
-
-            {% if status.value != 'purchased' %}
-
-                {% if app.user %}
-
-                    {% include 'components/_participation-form.html.twig' with {
-                        productId: productId,
-                        status: status,
-                        wishlistToken: wishlistToken,
-                        productUsers: productUsers
-                    } only %}
-
-                {% else %}
-
-                    <a href="{{ path('app_login', {redirect: path('app_wishlist', {token: wishlistToken})}) }}" class="w-full flex items-center justify-center text-sm font-semibold bg-[#FFF8F0] border border-[rgba(45,45,45,0.12)] text-[#2D2D2D] px-4 py-2 rounded-xl hover:bg-[#FFE66D] transition-colors">
-                        Participer à ce cadeau
+                    <a href="{{ path('app_login', {redirect: path('app_wishlist', {token: wishlistToken})}) }}" class="flex-1 text-center text-xs font-semibold px-3.5 py-2 rounded-lg bg-[#FFE66D] text-[#2D2D2D] hover:bg-[#ffd93d] transition">
+                        Offrir
                     </a>
 
-                {% endif %}
+                    <a href="{{ path('app_login', {redirect: path('app_wishlist', {token: wishlistToken})}) }}" class="flex-1 text-center text-xs font-semibold px-3.5 py-2 rounded-lg bg-[#FFF8F0] border border-[rgba(45,45,45,0.12)] text-[#2D2D2D] hover:bg-[#FFE66D] transition">
+                        Offrir à plusieurs
+                    </a>
+
+                </div>
 
             {% endif %}
 
-        </div>
+        {% endif %}
 
 
+        {# ====================================================== #}
+        {# CADEAU COLLABORATIF                                   #}
+        {# ====================================================== #}
 
+        {% if collaborative %}
+
+            <div class="rounded-xl bg-[#FFF8F0] border border-[rgba(45,45,45,0.08)] px-3.5 py-3 flex flex-col gap-0">
+
+
+                {# ================================================== #}
+                {# PROGRESSION                                       #}
+                {# ================================================== #}
+
+                <div>
+
+                    <div class="flex items-center justify-between text-xs text-[#6B6B6B] mb-2">
+
+                        <span>
+                            {{ contributedAmount|number_format(2, ',', ' ') }} € récolté
+                        </span>
+
+                        <span>
+                            {{ contributionPercent|number_format(0) }} %
+                        </span>
+
+                    </div>
+
+
+                    <div class="h-2 w-full rounded-full bg-[rgba(45,45,45,0.08)] overflow-hidden">
+
+                        <div class="h-full rounded-full transition-all duration-500" style="width: {{ contributionPercent }}%; background: linear-gradient(90deg, rgb(255, 230, 109), rgb(255, 154, 92));"></div>
+
+                    </div>
+
+
+                    {# ================================================== #}
+                    {# MONTANT RESTANT                                   #}
+                    {# ================================================== #}
+
+                    {% if remainingAmount > 0 %}
+
+                        <div class="text-xs text-[#6B6B6B] mt-2">
+                            Il reste
+                            <strong class="text-[#2D2D2D]">
+                                {{ remainingAmount|number_format(2, ',', ' ') }} €
+                            </strong>
+                            à financer
+                        </div>
+
+                    {% else %}
+
+                        <div class="flex items-center gap-1 text-xs font-semibold text-[#4ECDC4] mt-2">
+                            <span>✓</span>
+                            <span>Montant atteint</span>
+                        </div>
+
+                    {% endif %}
+
+
+                    {# ================================================== #}
+                    {# VOIR LES PARTICIPANTS                             #}
+                    {# ================================================== #}
+
+                    {% if productUsers|length > 0 %}
+
+                        <div class="mt-2">
+
+                            {% include 'components/_participants-modal.html.twig' with {
+                                productId: productId,
+                                productUsers: productUsers,
+                                contributedAmount: contributedAmount
+                            } only %}
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                {# ================================================== #}
+                {# FORMULAIRE DE PARTICIPATION                       #}
+                {# uniquement s'il reste de l'argent à financer     #}
+                {# ================================================== #}
+
+                {% if remainingAmount > 0 and status.value != 'purchased' %}
+
+                    {% if app.user %}
+
+                        {% include 'components/_participation-form.html.twig' with {
+                            productId: productId,
+                            status: status,
+                            wishlistToken: wishlistToken,
+                            productUsers: productUsers
+                        } only %}
+
+                    {% else %}
+
+                        <a href="{{ path('app_login', {redirect: path('app_wishlist', {token: wishlistToken})}) }}" class="w-full flex items-center justify-center mt-3 text-xs font-semibold bg-[#FFE66D] text-[#2D2D2D] px-4 py-2 rounded-lg hover:bg-[#ffd93d] transition">
+                            Participer
+                        </a>
+
+                    {% endif %}
+
+                {% endif %}
+
+
+                {# ================================================== #}
+                {# CAGNOTTE PLEINE                                   #}
+                {# Plus de bouton Participer                          #}
+                {# Un participant peut toutefois annuler             #}
+                {# ================================================== #}
+
+                {% if remainingAmount <= 0 and app.user %}
+
+                    {% set myParticipations = productUsers|filter(participation => participation.user.id == app.user.id) %}
+                    {% set myParticipation = myParticipations|first %}
+
+                    {% if myParticipation %}
+
+                        <div class="mt-3 pt-3 border-t border-[rgba(45,45,45,0.08)]">
+
+                            <p class="text-xs text-[#6B6B6B]">
+                                Votre participation :
+                                <strong class="text-[#2D2D2D]">
+                                    {{ myParticipation.amount|number_format(2, ',', ' ') }} €
+                                </strong>
+                            </p>
+
+                            <form method="post" action="{{ path('app_product_cancel_participation', {token: wishlistToken, id: productId}) }}" class="mt-1">
+
+                                <input type="hidden" name="_token" value="{{ csrf_token('cancel-participation-' ~ productId) }}">
+
+                                <button type="submit" class="text-xs text-[#FF6B6B] hover:underline">
+                                    Annuler ma participation
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    {% endif %}
+
+                {% endif %}
+
+            </div>
+
+        {% endif %}
+
+
+        {# ====================================================== #}
+        {# CADEAU OFFERT PAR UNE SEULE PERSONNE                  #}
+        {# ====================================================== #}
+
+        {% if not collaborative and productUsers|length > 0 and status.value != 'purchased' %}
+
+            <div class="rounded-xl bg-[#FFF8F0] border border-[rgba(45,45,45,0.08)] px-3.5 py-3">
+
+                <div class="flex items-center gap-2">
+
+                    <span class="flex items-center justify-center size-7 rounded-full bg-[#FFE66D] text-[#2D2D2D] text-sm shrink-0">
+                        ✓
+                    </span>
+
+                    <div class="flex-1">
+
+                        <p class="text-xs font-semibold text-[#2D2D2D]">
+                            Ce cadeau est pris en charge
+                        </p>
+
+
+                        {% if app.user and hasReserved %}
+
+                            <p class="text-xs text-[#6B6B6B]">
+                                Vous avez choisi d'offrir ce cadeau.
+                            </p>
+
+                        {% else %}
+
+                            <p class="text-xs text-[#6B6B6B]">
+                                Quelqu'un a choisi de l'offrir.
+                            </p>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                {# ================================================== #}
+                {# ANNULATION PAR LA PERSONNE QUI OFFRE              #}
+                {# ================================================== #}
+
+                {% if app.user and hasReserved %}
+
+                    <form method="post" action="{{ path('app_product_cancel_participation', {token: wishlistToken, id: productId}) }}" class="mt-2 ml-9">
+
+                        <input type="hidden" name="_token" value="{{ csrf_token('cancel-participation-' ~ productId) }}">
+
+                        <button type="submit" class="text-xs text-[#FF6B6B] hover:underline">
+                            Annuler
+                        </button>
+
+                    </form>
+
+                {% endif %}
+
+            </div>
+
+        {% endif %}
 
 
         {# ====================================================== #}
@@ -295,7 +508,6 @@
 
             {# ================================================== #}
             {# JE L'AI ACHETÉ                                    #}
-            {# uniquement pour un participant                    #}
             {# ================================================== #}
 
             {% if status.value != 'purchased' and app.user and hasReserved %}

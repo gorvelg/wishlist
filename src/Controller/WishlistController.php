@@ -704,15 +704,16 @@ final class WishlistController extends AbstractController
             )
         );
 
-
         /*
-         * À partir du moment où quelqu'un participe,
-         * le cadeau est en cours.
+         * Dès qu'une première participation
+         * avec un montant est enregistrée,
+         * le cadeau devient collaboratif.
          */
+        $product->setCollaborative(true);
+
         $product->setStatus(
             ProductStatus::BUYING
         );
-
 
         $em->flush();
 
@@ -1074,6 +1075,74 @@ final class WishlistController extends AbstractController
 
         return $this->redirectToRoute('app_wishlist', [
             'token' => $wishlist->getAccessToken(),
+        ]);
+    }
+
+
+    #[Route(
+        '/wishlist/{token}/product/{id}/offer',
+        name: 'app_product_offer',
+        methods: ['POST']
+    )]
+    public function offer(
+        string $token,
+        Product $product,
+        Request $request,
+        EntityManagerInterface $em,
+    ): Response {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        $user = $this->getUser();
+
+        if ($product->getWishlist()?->getAccessToken() !== $token) {
+            throw $this->createNotFoundException();
+        }
+
+        if (!$this->isCsrfTokenValid(
+            'offer-' . $product->getId(),
+            (string) $request->request->get('_token')
+        )) {
+            throw $this->createAccessDeniedException(
+                'Jeton CSRF invalide.'
+            );
+        }
+
+        if (
+            $product->getStatus() === ProductStatus::PURCHASED
+            || $product->isCollaborative()
+            || !$product->getProductUsers()->isEmpty()
+        ) {
+            $this->addFlash(
+                'error',
+                'Ce cadeau ne peut plus être offert individuellement.'
+            );
+
+            return $this->redirectToRoute('app_wishlist', [
+                'token' => $token,
+            ]);
+        }
+
+        $productUser = new ProductUser();
+
+        $productUser
+            ->setProduct($product)
+            ->setUser($user)
+            ->setAmount($product->getPrice());
+
+        $product->setStatus(
+            ProductStatus::BUYING
+        );
+
+        $em->persist($productUser);
+        $em->flush();
+
+        $this->addFlash(
+            'success',
+            'Vous avez choisi d’offrir ce cadeau.'
+        );
+
+        return $this->redirectToRoute('app_wishlist', [
+            'token' => $token,
         ]);
     }
 }
