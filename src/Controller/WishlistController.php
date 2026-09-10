@@ -423,6 +423,9 @@ final class WishlistController extends AbstractController
             - $giftedProducts;
 
 
+        $openDiscussionId =
+            $request->query->getInt('discussion');
+
         /*
          * ===============================================
          * AFFICHAGE
@@ -452,14 +455,12 @@ final class WishlistController extends AbstractController
                 'openProductModal' =>
                     $openProductModal,
 
-                /*
-                 * Nouveau :
-                 *
-                 * permet au Twig de savoir si
-                 * la modale est en mode édition.
-                 */
+
                 'editingProduct' =>
                     $editingProduct,
+
+                'openDiscussionId' =>
+                    $openDiscussionId,
             ]
         );
     }

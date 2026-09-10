@@ -11,6 +11,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
+
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
 {
@@ -56,6 +57,10 @@ class Product
     #[ORM\Column(options: ['default' => false])]
     private bool $collaborative = false;
 
+    #[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductMessage::class, orphanRemoval: true)]
+    #[ORM\OrderBy(['createdAt' => 'ASC'])]
+    private Collection $messages;
+
     #[Assert\Length(
         min: 2,
         max: 200,
@@ -68,11 +73,12 @@ class Product
     public function __construct()
     {
         $this->productUsers = new ArrayCollection();
+        $this->messages = new ArrayCollection();
 
         $now = new \DateTimeImmutable();
+
         $this->createdAt = $now;
         $this->updatedAt = $now;
-
         $this->status = ProductStatus::AVAILABLE;
     }
 
@@ -277,5 +283,34 @@ class Product
     public function setCollaborative(bool $collaborative): void
     {
         $this->collaborative = $collaborative;
+    }
+
+    /**
+     * @return Collection<int, ProductMessage>
+     */
+    public function getMessages(): Collection
+    {
+        return $this->messages;
+    }
+
+    public function addMessage(ProductMessage $message): static
+    {
+        if (!$this->messages->contains($message)) {
+            $this->messages->add($message);
+            $message->setProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMessage(ProductMessage $message): static
+    {
+        if ($this->messages->removeElement($message)) {
+            if ($message->getProduct() === $this) {
+                $message->setProduct(null);
+            }
+        }
+
+        return $this;
     }
 }

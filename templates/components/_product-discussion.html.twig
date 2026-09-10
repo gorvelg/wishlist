@@ -1,0 +1,168 @@
+<div data-controller="discussion" data-discussion-auto-open-value="{{ openDiscussion ? 'true' : 'false' }}">
+
+    {# ========================================================== #}
+    {# BOUTON DISCUSSION                                         #}
+    {# ========================================================== #}
+
+    <button type="button" data-action="click->discussion#open" class="inline-flex items-center gap-1.5 text-xs font-medium text-[#6B6B6B] hover:text-[#2D2D2D] transition">
+
+        <span aria-hidden="true">
+            💬
+        </span>
+
+        <span>
+            Discussion
+        </span>
+
+        {% if productMessages|length > 0 %}
+
+            <span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-[#FFE66D] text-[#2D2D2D] text-[10px] font-semibold">
+                {{ productMessages|length }}
+            </span>
+
+        {% endif %}
+
+    </button>
+
+
+    {# ========================================================== #}
+    {# MODALE                                                    #}
+    {# ========================================================== #}
+
+    <div data-discussion-target="modal" data-action="click->discussion#closeBackground keydown.esc@window->discussion#close" class="hidden fixed inset-0 z-50 bg-black/30 backdrop-blur-[1px] flex items-center justify-center p-4">
+
+        <div role="dialog" aria-modal="true" aria-labelledby="discussion-title-{{ productId }}" class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]">
+
+
+            {# ====================================================== #}
+            {# HEADER                                                #}
+            {# ====================================================== #}
+
+            <div class="flex items-center justify-between gap-4 px-5 py-4 border-b border-[rgba(45,45,45,0.08)]">
+
+                <div>
+
+                    <h2 id="discussion-title-{{ productId }}" class="font-semibold text-[#2D2D2D]">
+                        Discussion
+                    </h2>
+
+                    <p class="text-xs text-[#6B6B6B] mt-0.5">
+                        Organisez-vous entre participants
+                    </p>
+
+                </div>
+
+
+                <button type="button" data-discussion-target="closeButton" data-action="click->discussion#close" aria-label="Fermer la discussion" class="flex items-center justify-center size-8 rounded-full text-[#6B6B6B] hover:text-[#2D2D2D] hover:bg-[#FFF8F0] transition">
+                    ✕
+                </button>
+
+            </div>
+
+
+            {# ====================================================== #}
+            {# MESSAGES                                              #}
+            {# ====================================================== #}
+
+            <div data-discussion-target="messages" class="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+
+
+                {% if productMessages|length == 0 %}
+
+                    <div class="text-center py-8">
+
+                        <div class="text-2xl mb-2">
+                            💬
+                        </div>
+
+                        <p class="text-sm font-medium text-[#2D2D2D]">
+                            Aucun message
+                        </p>
+
+                        <p class="text-xs text-[#6B6B6B] mt-1">
+                            Lancez la discussion pour organiser ce cadeau.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+
+                {% for message in productMessages %}
+
+                    {% set isMine = app.user and message.user.id == app.user.id %}
+
+                    <div class="flex {% if isMine %}justify-end{% else %}justify-start{% endif %}">
+
+                        <div class="max-w-[80%]">
+
+
+                            {% if not isMine %}
+
+                                <p class="text-[11px] font-semibold text-[#6B6B6B] mb-1 ml-1">
+                                    {{ message.user.firstname }}
+
+                                    {% if message.user.lastname %}
+                                        {{ message.user.lastname|slice(0, 1)|upper }}.
+                                    {% endif %}
+                                </p>
+
+                            {% endif %}
+
+
+                            <div class="{% if isMine %}bg-[#4ECDC4] text-white{% else %}bg-[#FFF8F0] text-[#2D2D2D]{% endif %} rounded-2xl px-3.5 py-2.5">
+
+                                <p class="text-sm break-words">
+                                    {{ message.content }}
+                                </p>
+
+                            </div>
+
+
+                            <p class="text-[10px] text-[#6B6B6B] mt-1 {% if isMine %}text-right mr-1{% else %}ml-1{% endif %}">
+                                {{ message.createdAt|date('H:i') }}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            {# ====================================================== #}
+            {# FORMULAIRE                                            #}
+            {# ====================================================== #}
+
+            <div class="px-4 py-4 border-t border-[rgba(45,45,45,0.08)] bg-white">
+
+                <form method="post" action="{{ path('app_product_message', {token: wishlistToken, id: productId}) }}">
+
+                    <input type="hidden" name="_token" value="{{ csrf_token('product-message-' ~ productId) }}">
+
+                    <label for="product-message-{{ productId }}" class="sr-only">
+                        Écrire un message
+                    </label>
+
+
+                    <div class="flex items-end gap-2">
+
+                        <textarea id="product-message-{{ productId }}" name="content" maxlength="1000" rows="2" required placeholder="Écrire un message..." class="flex-1 resize-none rounded-xl bg-[#FFF8F0] border border-[rgba(45,45,45,0.12)] px-3 py-2 text-sm text-[#2D2D2D] placeholder:text-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/40"></textarea>
+
+                        <button type="submit" class="shrink-0 bg-[#FFE66D] text-[#2D2D2D] text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-[#ffd93d] active:scale-95 transition">
+                            Envoyer
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

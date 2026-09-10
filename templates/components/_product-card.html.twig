@@ -350,6 +350,21 @@
 
                     {% endif %}
 
+                    {% if app.user and hasReserved %}
+
+                        <div class="mt-2">
+
+                            {% include 'components/_product-discussion.html.twig' with {
+                                productId: productId,
+                                wishlistToken: wishlistToken,
+                                productMessages: productMessages,
+                                openDiscussion: openDiscussion
+                            } only %}
+
+                        </div>
+
+                    {% endif %}
+
                 </div>
 
 
