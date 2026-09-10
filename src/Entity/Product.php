@@ -70,6 +70,10 @@ class Product
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?User $buyer = null;
+
     public function __construct()
     {
         $this->productUsers = new ArrayCollection();
@@ -359,5 +363,15 @@ class Product
         }
 
         return $count;
+    }
+
+    public function getBuyer(): ?User
+    {
+        return $this->buyer;
+    }
+
+    public function setBuyer(?User $buyer): void
+    {
+        $this->buyer = $buyer;
     }
 }

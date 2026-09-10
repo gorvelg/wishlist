@@ -109,7 +109,8 @@
                         collaborative: product.collaborative,
                         productMessages: product.messages,
                         openDiscussion: openDiscussionId == product.id,
-                        unreadMessageCount: app.user and hasReserved ? product.getUnreadMessageCountFor(app.user) : 0
+                        unreadMessageCount: app.user and hasReserved ? product.getUnreadMessageCountFor(app.user) : 0,
+                        buyer: product.buyer,
                     } only %}
 
                 </div>

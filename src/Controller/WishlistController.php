@@ -751,6 +751,12 @@ final class WishlistController extends AbstractController
         $user = $this->getUser();
 
 
+        /*
+         * ===============================================
+         * VÉRIFICATION DU PRODUIT
+         * ===============================================
+         */
+
         if (
             $product->getWishlist()?->getAccessToken()
             !== $token
@@ -758,6 +764,12 @@ final class WishlistController extends AbstractController
             throw $this->createNotFoundException();
         }
 
+
+        /*
+         * ===============================================
+         * CSRF
+         * ===============================================
+         */
 
         if (
             !$this->isCsrfTokenValid(
@@ -770,6 +782,12 @@ final class WishlistController extends AbstractController
             );
         }
 
+
+        /*
+         * ===============================================
+         * PARTICIPATION
+         * ===============================================
+         */
 
         $productUser = $em
             ->getRepository(ProductUser::class)
@@ -795,6 +813,31 @@ final class WishlistController extends AbstractController
         }
 
 
+        /*
+         * ===============================================
+         * SI L'UTILISATEUR ÉTAIT CHARGÉ DE L'ACHAT
+         * ===============================================
+         *
+         * Un buyer doit obligatoirement être participant.
+         *
+         * Donc s'il annule sa participation,
+         * il ne peut plus rester buyer.
+         */
+
+        if (
+            $product->getBuyer()?->getId()
+            === $user->getId()
+        ) {
+            $product->setBuyer(null);
+        }
+
+
+        /*
+         * ===============================================
+         * SUPPRESSION DE LA PARTICIPATION
+         * ===============================================
+         */
+
         $product->removeProductUser(
             $productUser
         );
@@ -805,9 +848,19 @@ final class WishlistController extends AbstractController
 
 
         /*
-         * Plus aucun participant :
-         * le cadeau redevient disponible.
+         * ===============================================
+         * PLUS AUCUN PARTICIPANT
+         * ===============================================
+         *
+         * Le cadeau revient complètement à son état initial.
+         *
+         * Il redevient :
+         *
+         * AVAILABLE
+         * non collaboratif
+         * sans buyer
          */
+
         if (
             $product
                 ->getProductUsers()
@@ -816,8 +869,22 @@ final class WishlistController extends AbstractController
             $product->setStatus(
                 ProductStatus::AVAILABLE
             );
+
+            $product->setCollaborative(
+                false
+            );
+
+            $product->setBuyer(
+                null
+            );
         }
 
+
+        /*
+         * ===============================================
+         * ENREGISTREMENT
+         * ===============================================
+         */
 
         $em->flush();
 
@@ -846,12 +913,18 @@ final class WishlistController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
     ): Response {
-
         $this->denyAccessUnlessGranted(
             'IS_AUTHENTICATED_FULLY'
         );
 
         $user = $this->getUser();
+
+
+        /*
+         * ===============================================
+         * VÉRIFICATION DU PRODUIT
+         * ===============================================
+         */
 
         if (
             $product->getWishlist()?->getAccessToken()
@@ -859,6 +932,13 @@ final class WishlistController extends AbstractController
         ) {
             throw $this->createNotFoundException();
         }
+
+
+        /*
+         * ===============================================
+         * CSRF
+         * ===============================================
+         */
 
         if (
             !$this->isCsrfTokenValid(
@@ -870,6 +950,13 @@ final class WishlistController extends AbstractController
                 'Jeton CSRF invalide.'
             );
         }
+
+
+        /*
+         * ===============================================
+         * DÉJÀ ACHETÉ
+         * ===============================================
+         */
 
         if (
             $product->getStatus()
@@ -889,26 +976,11 @@ final class WishlistController extends AbstractController
         }
 
 
-        $productUser = $em
-            ->getRepository(ProductUser::class)
-            ->findOneBy([
-                'product' => $product,
-                'user' => $user,
-            ]);
-
-        if ($productUser === null) {
-            $this->addFlash(
-                'error',
-                'Vous devez participer à ce cadeau avant de pouvoir le marquer comme acheté.'
-            );
-
-            return $this->redirectToRoute(
-                'app_wishlist',
-                [
-                    'token' => $token,
-                ]
-            );
-        }
+        /*
+         * ===============================================
+         * LE PRODUIT DOIT ÊTRE EN COURS D'ACHAT
+         * ===============================================
+         */
 
         if (
             $product->getStatus()
@@ -927,16 +999,109 @@ final class WishlistController extends AbstractController
             );
         }
 
+
+        /*
+         * ===============================================
+         * CADEAU COLLABORATIF
+         * ===============================================
+         *
+         * Seule la personne désignée comme buyer
+         * peut déclarer le cadeau acheté.
+         */
+
+        if ($product->isCollaborative()) {
+
+            if ($product->getBuyer() === null) {
+
+                $this->addFlash(
+                    'error',
+                    'Aucun participant ne s’est encore chargé de l’achat de ce cadeau.'
+                );
+
+                return $this->redirectToRoute(
+                    'app_wishlist',
+                    [
+                        'token' => $token,
+                    ]
+                );
+            }
+
+
+            if (
+                $product->getBuyer()?->getId()
+                !== $user->getId()
+            ) {
+
+                $this->addFlash(
+                    'error',
+                    'Seule la personne chargée de l’achat peut marquer ce cadeau comme acheté.'
+                );
+
+                return $this->redirectToRoute(
+                    'app_wishlist',
+                    [
+                        'token' => $token,
+                    ]
+                );
+            }
+
+        } else {
+
+            /*
+             * ===============================================
+             * CADEAU OFFERT SEUL
+             * ===============================================
+             *
+             * Il n'y a pas de buyer.
+             *
+             * La personne ayant réservé le cadeau
+             * est automatiquement celle qui l'achète.
+             */
+
+            $productUser = $em
+                ->getRepository(ProductUser::class)
+                ->findOneBy([
+                    'product' => $product,
+                    'user' => $user,
+                ]);
+
+
+            if ($productUser === null) {
+
+                $this->addFlash(
+                    'error',
+                    'Vous devez avoir choisi d’offrir ce cadeau avant de pouvoir le marquer comme acheté.'
+                );
+
+                return $this->redirectToRoute(
+                    'app_wishlist',
+                    [
+                        'token' => $token,
+                    ]
+                );
+            }
+        }
+
+
+        /*
+         * ===============================================
+         * MARQUER COMME ACHETÉ
+         * ===============================================
+         */
+
         $product->setStatus(
             ProductStatus::PURCHASED
         );
 
+
         $em->flush();
+
 
         $this->addFlash(
             'success',
             'Le cadeau a été marqué comme acheté.'
         );
+
 
         return $this->redirectToRoute(
             'app_wishlist',
@@ -963,12 +1128,26 @@ final class WishlistController extends AbstractController
 
         $user = $this->getUser();
 
+
+        /*
+         * ===============================================
+         * VÉRIFICATION DU PRODUIT
+         * ===============================================
+         */
+
         if (
             $product->getWishlist()?->getAccessToken()
             !== $token
         ) {
             throw $this->createNotFoundException();
         }
+
+
+        /*
+         * ===============================================
+         * CSRF
+         * ===============================================
+         */
 
         if (
             !$this->isCsrfTokenValid(
@@ -980,6 +1159,13 @@ final class WishlistController extends AbstractController
                 'Jeton CSRF invalide.'
             );
         }
+
+
+        /*
+         * ===============================================
+         * LE CADEAU DOIT ÊTRE ACHETÉ
+         * ===============================================
+         */
 
         if (
             $product->getStatus()
@@ -998,37 +1184,89 @@ final class WishlistController extends AbstractController
             );
         }
 
-        $productUser = $em
-            ->getRepository(ProductUser::class)
-            ->findOneBy([
-                'product' => $product,
-                'user' => $user,
-            ]);
 
-        if ($productUser === null) {
-            $this->addFlash(
-                'error',
-                'Vous ne pouvez pas modifier ce cadeau.'
-            );
+        /*
+         * ===============================================
+         * CADEAU COLLABORATIF
+         * ===============================================
+         *
+         * Seul le buyer peut annuler l'achat.
+         */
 
-            return $this->redirectToRoute(
-                'app_wishlist',
-                [
-                    'token' => $token,
-                ]
-            );
+        if ($product->isCollaborative()) {
+
+            if (
+                $product->getBuyer() === null
+                || $product->getBuyer()?->getId() !== $user->getId()
+            ) {
+                $this->addFlash(
+                    'error',
+                    'Seule la personne chargée de l’achat peut annuler cet achat.'
+                );
+
+                return $this->redirectToRoute(
+                    'app_wishlist',
+                    [
+                        'token' => $token,
+                    ]
+                );
+            }
+
+        } else {
+
+            /*
+             * ===============================================
+             * CADEAU SOLO
+             * ===============================================
+             *
+             * La personne qui offre doit être celle
+             * ayant réservé le cadeau.
+             */
+
+            $productUser = $em
+                ->getRepository(ProductUser::class)
+                ->findOneBy([
+                    'product' => $product,
+                    'user' => $user,
+                ]);
+
+
+            if ($productUser === null) {
+
+                $this->addFlash(
+                    'error',
+                    'Vous ne pouvez pas modifier ce cadeau.'
+                );
+
+                return $this->redirectToRoute(
+                    'app_wishlist',
+                    [
+                        'token' => $token,
+                    ]
+                );
+            }
         }
+
+
+        /*
+         * ===============================================
+         * REMETTRE LE CADEAU EN COURS D'ACHAT
+         * ===============================================
+         */
 
         $product->setStatus(
             ProductStatus::BUYING
         );
 
+
         $em->flush();
+
 
         $this->addFlash(
             'success',
             'Le cadeau a été remis en cours d\'achat.'
         );
+
 
         return $this->redirectToRoute(
             'app_wishlist',
