@@ -35,6 +35,9 @@ class ProductUser
     )]
     private ?string $amount = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $discussionReadAt = null;
+
     public function __construct()
     {
         $now = new \DateTimeImmutable();
@@ -92,5 +95,15 @@ class ProductUser
         $this->amount = $amount;
 
         return $this;
+    }
+
+    public function getDiscussionReadAt(): ?\DateTimeImmutable
+    {
+        return $this->discussionReadAt;
+    }
+
+    public function setDiscussionReadAt(?\DateTimeImmutable $discussionReadAt): void
+    {
+        $this->discussionReadAt = $discussionReadAt;
     }
 }

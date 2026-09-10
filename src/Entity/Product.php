@@ -313,4 +313,51 @@ class Product
 
         return $this;
     }
+    public function getUnreadMessageCountFor(User $user): int
+    {
+        $participation = null;
+
+        foreach ($this->productUsers as $productUser) {
+            if ($productUser->getUser()?->getId() === $user->getId()) {
+                $participation = $productUser;
+                break;
+            }
+        }
+
+        if ($participation === null) {
+            return 0;
+        }
+
+        $lastReadAt = $participation->getDiscussionReadAt();
+        $count = 0;
+
+        foreach ($this->messages as $message) {
+
+            /*
+             * Ses propres messages ne sont jamais considérés
+             * comme non lus.
+             */
+            if ($message->getUser()?->getId() === $user->getId()) {
+                continue;
+            }
+
+            /*
+             * Jamais ouvert la discussion :
+             * tous les messages des autres sont non lus.
+             */
+            if ($lastReadAt === null) {
+                $count++;
+                continue;
+            }
+
+            /*
+             * Message envoyé après la dernière lecture.
+             */
+            if ($message->getCreatedAt() > $lastReadAt) {
+                $count++;
+            }
+        }
+
+        return $count;
+    }
 }

@@ -1,4 +1,4 @@
-<div data-controller="discussion" data-discussion-auto-open-value="{{ openDiscussion ? 'true' : 'false' }}">
+<div data-controller="discussion" data-discussion-auto-open-value="{{ openDiscussion ? 'true' : 'false' }}" data-discussion-read-url-value="{{ path('app_product_discussion_read', {token: wishlistToken, id: productId}) }}" data-discussion-csrf-value="{{ csrf_token('discussion-read-' ~ productId) }}">
 
     {# ========================================================== #}
     {# BOUTON DISCUSSION                                         #}
@@ -6,19 +6,25 @@
 
     <button type="button" data-action="click->discussion#open" class="inline-flex items-center gap-1.5 text-xs font-medium text-[#6B6B6B] hover:text-[#2D2D2D] transition">
 
-        <span aria-hidden="true">
-            💬
-        </span>
+    <span aria-hidden="true">
+        💬
+    </span>
 
         <span>
-            Discussion
+        Discussion
+    </span>
+
+        {% if unreadMessageCount > 0 %}
+
+            <span data-discussion-target="badge" class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-[#FF6B6B] text-white text-[10px] font-semibold">
+            {{ unreadMessageCount }}
         </span>
 
-        {% if productMessages|length > 0 %}
+        {% elseif productMessages|length > 0 %}
 
-            <span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-[#FFE66D] text-[#2D2D2D] text-[10px] font-semibold">
-                {{ productMessages|length }}
-            </span>
+            <span class="text-[10px] text-[#6B6B6B]">
+            {{ productMessages|length }}
+        </span>
 
         {% endif %}
 

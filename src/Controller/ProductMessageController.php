@@ -7,6 +7,7 @@ use App\Entity\ProductMessage;
 use App\Entity\ProductUser;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -24,9 +25,7 @@ final class ProductMessageController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
     ): Response {
-        $this->denyAccessUnlessGranted(
-            'IS_AUTHENTICATED_FULLY'
-        );
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
         $user = $this->getUser();
 
@@ -37,10 +36,7 @@ final class ProductMessageController extends AbstractController
          * ===============================================
          */
 
-        if (
-            $product->getWishlist()?->getAccessToken()
-            !== $token
-        ) {
+        if ($product->getWishlist()?->getAccessToken() !== $token) {
             throw $this->createNotFoundException();
         }
 
@@ -60,7 +56,7 @@ final class ProductMessageController extends AbstractController
 
         /*
          * ===============================================
-         * VÉRIFIER QUE L'UTILISATEUR PARTICIPE
+         * VÉRIFIER LA PARTICIPATION
          * ===============================================
          */
 
@@ -70,7 +66,6 @@ final class ProductMessageController extends AbstractController
                 'product' => $product,
                 'user' => $user,
             ]);
-
 
         if ($participation === null) {
             throw $this->createAccessDeniedException(
@@ -105,7 +100,6 @@ final class ProductMessageController extends AbstractController
             (string) $request->request->get('content')
         );
 
-
         if ($content === '') {
             $this->addFlash(
                 'error',
@@ -120,7 +114,6 @@ final class ProductMessageController extends AbstractController
                 ]
             );
         }
-
 
         if (mb_strlen($content) > 1000) {
             $this->addFlash(
@@ -137,7 +130,6 @@ final class ProductMessageController extends AbstractController
             );
         }
 
-
         $message = new ProductMessage();
 
         $message
@@ -145,15 +137,19 @@ final class ProductMessageController extends AbstractController
             ->setUser($user)
             ->setContent($content);
 
-
         $em->persist($message);
-        $em->flush();
 
 
         /*
-         * discussion=id permet de rouvrir
-         * automatiquement la modale.
+         * Puisque l'utilisateur est dans la discussion lorsqu'il
+         * écrit, on considère également les messages précédents lus.
          */
+        $participation->setDiscussionReadAt(
+            new \DateTimeImmutable()
+        );
+
+        $em->flush();
+
         return $this->redirectToRoute(
             'app_wishlist',
             [
@@ -161,5 +157,91 @@ final class ProductMessageController extends AbstractController
                 'discussion' => $product->getId(),
             ]
         );
+    }
+
+
+    #[Route(
+        '/wishlist/{token}/product/{id}/discussion/read',
+        name: 'app_product_discussion_read',
+        methods: ['POST']
+    )]
+    public function read(
+        string $token,
+        Product $product,
+        Request $request,
+        EntityManagerInterface $em,
+    ): JsonResponse {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        $user = $this->getUser();
+
+
+        /*
+         * ===============================================
+         * VÉRIFIER LA WISHLIST
+         * ===============================================
+         */
+
+        if ($product->getWishlist()?->getAccessToken() !== $token) {
+            return new JsonResponse(
+                ['success' => false],
+                404
+            );
+        }
+
+
+        /*
+         * ===============================================
+         * VÉRIFIER LE CSRF
+         * ===============================================
+         */
+
+        if (!$this->isCsrfTokenValid(
+            'discussion-read-' . $product->getId(),
+            (string) $request->request->get('_token')
+        )) {
+            return new JsonResponse(
+                ['success' => false],
+                403
+            );
+        }
+
+
+        /*
+         * ===============================================
+         * VÉRIFIER QUE L'UTILISATEUR PARTICIPE
+         * ===============================================
+         */
+
+        $participation = $em
+            ->getRepository(ProductUser::class)
+            ->findOneBy([
+                'product' => $product,
+                'user' => $user,
+            ]);
+
+        if ($participation === null) {
+            return new JsonResponse(
+                ['success' => false],
+                403
+            );
+        }
+
+
+        /*
+         * ===============================================
+         * MARQUER LA DISCUSSION COMME LUE
+         * ===============================================
+         */
+
+        $participation->setDiscussionReadAt(
+            new \DateTimeImmutable()
+        );
+
+        $em->flush();
+
+        return new JsonResponse([
+            'success' => true,
+        ]);
     }
 }
