@@ -7,11 +7,9 @@ export default class extends Controller {
     ];
 
     connect() {
-        console.log('✅ participation_controller connecté');
     }
 
     showForm() {
-        console.log('✅ clic Offrir à plusieurs');
 
         this.choicesTarget.classList.add('hidden');
         this.formTarget.classList.remove('hidden');
@@ -22,7 +20,6 @@ export default class extends Controller {
     }
 
     hideForm() {
-        console.log('✅ annulation formulaire');
 
         this.formTarget.classList.add('hidden');
         this.choicesTarget.classList.remove('hidden');

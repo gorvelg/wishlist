@@ -6,6 +6,24 @@
 
     {% if status.value == 'purchased' %}
 
+        {% set canCancelPurchased = false %}
+
+        {% if app.user %}
+
+            {% if collaborative %}
+
+                {% if buyer and buyer.id == app.user.id %}
+                    {% set canCancelPurchased = true %}
+                {% endif %}
+
+            {% elseif hasReserved %}
+
+                {% set canCancelPurchased = true %}
+
+            {% endif %}
+
+        {% endif %}
+
         <div class="absolute inset-0 bg-white/80 backdrop-blur-[1px] flex flex-col items-center justify-center gap-3 z-20 rounded-2xl">
 
             <div class="flex items-center gap-2 bg-green-100 text-green-700 border border-green-200 px-4 py-2 rounded-xl text-sm font-semibold">
@@ -13,7 +31,7 @@
                 <span>Cadeau acheté</span>
             </div>
 
-            {% if app.user and hasReserved %}
+            {% if canCancelPurchased %}
 
                 <form action="{{ path('app_product_cancel_purchased', {token: wishlistToken, id: productId}) }}" method="post">
 
@@ -382,8 +400,8 @@
 
                         <div class="flex items-center gap-3">
 
-            <span class="flex items-center justify-center size-8 rounded-full bg-[#CFF5F2] text-sm shrink-0">
-                🛍️
+            <span class="flex items-center justify-center size-8 rounded-full bg-[#ffb4b4] text-sm shrink-0">
+                <img src="{{ asset('images/trolley.png') }}" alt="caddie" class="size-4">
             </span>
 
                             <div class="flex-1 min-w-0">
@@ -443,7 +461,7 @@
                         <div class="flex items-start gap-3">
 
             <span class="flex items-center justify-center size-8 rounded-full bg-[#FFF8F0] border border-[rgba(45,45,45,0.08)] text-sm shrink-0">
-                🛍️
+                <img src="{{ asset('images/trolley.png') }}" alt="caddie" class="size-4">
             </span>
 
                             <div class="flex-1">

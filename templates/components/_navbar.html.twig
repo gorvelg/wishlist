@@ -1,8 +1,5 @@
 <nav class="relative z-20 flex items-center justify-between px-8 py-5 max-w-6xl mx-auto">
-    <div class="flex items-center gap-2">
-        <span class="text-xl">🌿</span>
-        <span class="font-title text-lg font-semibold text-[#2D2D2D]">MyWishlist</span>
-    </div>
+    <img src="{{ asset('images/logo_nidou.png') }}" alt="Nidou" class="h-10 w-auto">
     {% if app.user is null  %}
     <div class="flex items-center gap-4">
         <a
