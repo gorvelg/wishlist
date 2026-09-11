@@ -6,25 +6,38 @@
 
     <button type="button" data-action="click->discussion#open" class="inline-flex items-center gap-1.5 text-xs font-medium text-[#6B6B6B] hover:text-[#2D2D2D] transition">
 
-    <span aria-hidden="true">
-        <img src="{{ asset('images/chat.png') }}" alt="bulle de discussion" class="size-4">
-    </span>
+        <span aria-hidden="true">
+            <img src="{{ asset('images/chat.png') }}" alt="" class="size-4">
+        </span>
 
         <span>
-        Discussion
-    </span>
+            Discussion
+        </span>
+
+
+        {# ====================================================== #}
+        {# NOMBRE TOTAL DE MESSAGES                              #}
+        {#                                                       #}
+        {# L'élément existe toujours pour que Turbo puisse       #}
+        {# le mettre à jour après le premier message.            #}
+        {# ====================================================== #}
+
+        <span id="discussion-count-{{ productId }}" class="text-[10px] text-[#6B6B6B]">
+            {% if productMessages|length > 0 %}
+                {{ productMessages|length }}
+            {% endif %}
+        </span>
+
+
+        {# ====================================================== #}
+        {# MESSAGES NON LUS                                      #}
+        {# ====================================================== #}
 
         {% if unreadMessageCount > 0 %}
 
-            <span data-discussion-target="badge" class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-[#FF6B6B] text-white text-[10px] font-semibold">
-            {{ unreadMessageCount }}
-        </span>
-
-        {% elseif productMessages|length > 0 %}
-
-            <span class="text-[10px] text-[#6B6B6B]">
-            {{ productMessages|length }}
-        </span>
+            <span data-discussion-target="badge" aria-label="{{ unreadMessageCount }} message{% if unreadMessageCount > 1 %}s{% endif %} non lu{% if unreadMessageCount > 1 %}s{% endif %}" class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-[#FF6B6B] text-white text-[10px] font-semibold">
+                {{ unreadMessageCount }}
+            </span>
 
         {% endif %}
 
@@ -70,15 +83,19 @@
             {# MESSAGES                                              #}
             {# ====================================================== #}
 
-            <div data-discussion-target="messages" class="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+            <div id="product-messages-{{ productId }}" data-discussion-target="messages" class="flex-1 overflow-y-auto px-5 py-4 space-y-4">
 
+
+                {# ================================================== #}
+                {# AUCUN MESSAGE                                     #}
+                {# ================================================== #}
 
                 {% if productMessages|length == 0 %}
 
-                    <div class="text-center py-8">
+                    <div id="product-discussion-empty-{{ productId }}" class="text-center py-8">
 
-                        <div class="text-2xl mb-2">
-                            💬
+                        <div class="flex items-center justify-center mb-3">
+                            <img src="{{ asset('images/chat.png') }}" alt="" class="size-8 opacity-50">
                         </div>
 
                         <p class="text-sm font-medium text-[#2D2D2D]">
@@ -94,44 +111,15 @@
                 {% endif %}
 
 
+                {# ================================================== #}
+                {# LISTE DES MESSAGES                                #}
+                {# ================================================== #}
+
                 {% for message in productMessages %}
 
-                    {% set isMine = app.user and message.user.id == app.user.id %}
-
-                    <div class="flex {% if isMine %}justify-end{% else %}justify-start{% endif %}">
-
-                        <div class="max-w-[80%]">
-
-
-                            {% if not isMine %}
-
-                                <p class="text-[11px] font-semibold text-[#6B6B6B] mb-1 ml-1">
-                                    {{ message.user.firstname }}
-
-                                    {% if message.user.lastname %}
-                                        {{ message.user.lastname|slice(0, 1)|upper }}.
-                                    {% endif %}
-                                </p>
-
-                            {% endif %}
-
-
-                            <div class="{% if isMine %}bg-[#4ECDC4] text-white{% else %}bg-[#FFF8F0] text-[#2D2D2D]{% endif %} rounded-2xl px-3.5 py-2.5">
-
-                                <p class="text-sm break-words">
-                                    {{ message.content }}
-                                </p>
-
-                            </div>
-
-
-                            <p class="text-[10px] text-[#6B6B6B] mt-1 {% if isMine %}text-right mr-1{% else %}ml-1{% endif %}">
-                                {{ message.createdAt|date('H:i') }}
-                            </p>
-
-                        </div>
-
-                    </div>
+                    {% include 'components/chat/_message.html.twig' with {
+                        message: message
+                    } only %}
 
                 {% endfor %}
 
@@ -144,24 +132,46 @@
 
             <div class="px-4 py-4 border-t border-[rgba(45,45,45,0.08)] bg-white">
 
-                <form method="post" action="{{ path('app_product_message', {token: wishlistToken, id: productId}) }}">
+                <form method="post" action="{{ path('app_product_message', {token: wishlistToken, id: productId}) }}" data-action="turbo:submit-end->discussion#afterSubmit">
 
                     <input type="hidden" name="_token" value="{{ csrf_token('product-message-' ~ productId) }}">
 
-                    <label for="product-message-{{ productId }}" class="sr-only">
+
+                    {# ================================================== #}
+                    {# LABEL ACCESSIBLE                                  #}
+                    {# ================================================== #}
+
+                    <label for="product-message-input-{{ productId }}" class="sr-only">
                         Écrire un message
                     </label>
 
 
                     <div class="flex items-end gap-2">
 
-                        <textarea id="product-message-{{ productId }}" name="content" maxlength="1000" rows="2" required placeholder="Écrire un message..." class="flex-1 resize-none rounded-xl bg-[#FFF8F0] border border-[rgba(45,45,45,0.12)] px-3 py-2 text-sm text-[#2D2D2D] placeholder:text-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/40"></textarea>
+
+                        {# ================================================== #}
+                        {# MESSAGE                                           #}
+                        {# ================================================== #}
+
+                        <textarea id="product-message-input-{{ productId }}" name="content" maxlength="1000" rows="2" required placeholder="Écrire un message..." data-discussion-target="input" class="flex-1 resize-none rounded-xl bg-[#FFF8F0] border border-[rgba(45,45,45,0.12)] px-3 py-2 text-sm text-[#2D2D2D] placeholder:text-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/40"></textarea>
+
+
+                        {# ================================================== #}
+                        {# ENVOYER                                           #}
+                        {# ================================================== #}
 
                         <button type="submit" class="shrink-0 bg-[#FFE66D] text-[#2D2D2D] text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-[#ffd93d] active:scale-95 transition">
                             Envoyer
                         </button>
 
                     </div>
+
+
+                    {# ================================================== #}
+                    {# ERREURS TURBO                                     #}
+                    {# ================================================== #}
+
+                    <div id="discussion-error-{{ productId }}"></div>
 
                 </form>
 

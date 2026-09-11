@@ -1,0 +1,33 @@
+{% set isMine = app.user and message.user.id == app.user.id %}
+
+<div id="product-message-{{ message.id }}" class="flex {% if isMine %}justify-end{% else %}justify-start{% endif %}">
+
+    <div class="max-w-[80%]">
+
+        {% if not isMine %}
+
+            <p class="text-[11px] font-semibold text-[#6B6B6B] mb-1 ml-1">
+                {{ message.user.firstname }}
+
+                {% if message.user.lastname %}
+                    {{ message.user.lastname|slice(0, 1)|upper }}.
+                {% endif %}
+            </p>
+
+        {% endif %}
+
+        <div class="{% if isMine %}bg-[#4ECDC4] text-white{% else %}bg-[#FFF8F0] text-[#2D2D2D]{% endif %} rounded-2xl px-3.5 py-2.5">
+
+            <p class="text-sm whitespace-pre-line break-words">
+                {{ message.content }}
+            </p>
+
+        </div>
+
+        <p class="text-[10px] text-[#6B6B6B] mt-1 {% if isMine %}text-right mr-1{% else %}ml-1{% endif %}">
+            {{ message.createdAt|date('H:i') }}
+        </p>
+
+    </div>
+
+</div>

@@ -5,7 +5,8 @@ export default class extends Controller {
         'modal',
         'closeButton',
         'messages',
-        'badge'
+        'badge',
+        'input'
     ];
 
     static values = {
@@ -57,7 +58,9 @@ export default class extends Controller {
     }
 
     closeBackground(event) {
-        if (event.target === event.currentTarget) {
+        if (
+            event.target === event.currentTarget
+        ) {
             this.close();
         }
     }
@@ -71,12 +74,40 @@ export default class extends Controller {
             this.messagesTarget.scrollHeight;
     }
 
+    afterSubmit(event) {
+        /*
+         * Le POST doit avoir réussi.
+         */
+        if (!event.detail.success) {
+            return;
+        }
+
+        /*
+         * Vider le textarea.
+         */
+        if (this.hasInputTarget) {
+            this.inputTarget.value = '';
+            this.inputTarget.focus();
+        }
+
+        /*
+         * Le Turbo Stream doit d'abord avoir le temps
+         * d'ajouter le nouveau message dans le DOM.
+         */
+        requestAnimationFrame(() => {
+
+            this.scrollToBottom();
+
+        });
+    }
+
     async markAsRead() {
         if (!this.hasReadUrlValue) {
             return;
         }
 
         try {
+
             const body = new URLSearchParams();
 
             body.append(
@@ -84,42 +115,50 @@ export default class extends Controller {
                 this.csrfValue
             );
 
+
             const response = await fetch(
                 this.readUrlValue,
                 {
                     method: 'POST',
+
                     headers: {
                         'Content-Type':
                             'application/x-www-form-urlencoded',
+
                         'X-Requested-With':
                             'XMLHttpRequest'
                     },
+
                     body: body.toString()
                 }
             );
+
 
             if (!response.ok) {
                 return;
             }
 
-            const data = await response.json();
+
+            const data =
+                await response.json();
+
 
             if (!data.success) {
                 return;
             }
 
-            /*
-             * La discussion vient d'être lue :
-             * on fait disparaître le badge immédiatement.
-             */
+
             if (this.hasBadgeTarget) {
                 this.badgeTarget.remove();
             }
+
         } catch (error) {
+
             console.error(
                 'Impossible de marquer la discussion comme lue.',
                 error
             );
+
         }
     }
 }

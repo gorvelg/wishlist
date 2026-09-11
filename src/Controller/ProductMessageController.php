@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\UX\Turbo\TurboBundle;
 
 final class ProductMessageController extends AbstractController
 {
@@ -25,7 +26,9 @@ final class ProductMessageController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
     ): Response {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        $this->denyAccessUnlessGranted(
+            'IS_AUTHENTICATED_FULLY'
+        );
 
         $user = $this->getUser();
 
@@ -36,7 +39,10 @@ final class ProductMessageController extends AbstractController
          * ===============================================
          */
 
-        if ($product->getWishlist()?->getAccessToken() !== $token) {
+        if (
+            $product->getWishlist()?->getAccessToken()
+            !== $token
+        ) {
             throw $this->createNotFoundException();
         }
 
@@ -56,7 +62,7 @@ final class ProductMessageController extends AbstractController
 
         /*
          * ===============================================
-         * VÉRIFIER LA PARTICIPATION
+         * VÉRIFIER QUE L'UTILISATEUR PARTICIPE
          * ===============================================
          */
 
@@ -66,6 +72,7 @@ final class ProductMessageController extends AbstractController
                 'product' => $product,
                 'user' => $user,
             ]);
+
 
         if ($participation === null) {
             throw $this->createAccessDeniedException(
@@ -80,10 +87,12 @@ final class ProductMessageController extends AbstractController
          * ===============================================
          */
 
-        if (!$this->isCsrfTokenValid(
-            'product-message-' . $product->getId(),
-            (string) $request->request->get('_token')
-        )) {
+        if (
+            !$this->isCsrfTokenValid(
+                'product-message-' . $product->getId(),
+                (string) $request->request->get('_token')
+            )
+        ) {
             throw $this->createAccessDeniedException(
                 'Jeton CSRF invalide.'
             );
@@ -92,7 +101,7 @@ final class ProductMessageController extends AbstractController
 
         /*
          * ===============================================
-         * MESSAGE
+         * CONTENU DU MESSAGE
          * ===============================================
          */
 
@@ -100,35 +109,46 @@ final class ProductMessageController extends AbstractController
             (string) $request->request->get('content')
         );
 
+
+        /*
+         * ===============================================
+         * MESSAGE VIDE
+         * ===============================================
+         */
+
         if ($content === '') {
-            $this->addFlash(
-                'error',
+
+            return $this->messageError(
+                $request,
+                $product,
+                $token,
                 'Votre message ne peut pas être vide.'
             );
-
-            return $this->redirectToRoute(
-                'app_wishlist',
-                [
-                    'token' => $token,
-                    'discussion' => $product->getId(),
-                ]
-            );
         }
+
+
+        /*
+         * ===============================================
+         * MESSAGE TROP LONG
+         * ===============================================
+         */
 
         if (mb_strlen($content) > 1000) {
-            $this->addFlash(
-                'error',
+
+            return $this->messageError(
+                $request,
+                $product,
+                $token,
                 'Votre message ne peut pas dépasser 1000 caractères.'
             );
-
-            return $this->redirectToRoute(
-                'app_wishlist',
-                [
-                    'token' => $token,
-                    'discussion' => $product->getId(),
-                ]
-            );
         }
+
+
+        /*
+         * ===============================================
+         * CRÉATION DU MESSAGE
+         * ===============================================
+         */
 
         $message = new ProductMessage();
 
@@ -137,28 +157,82 @@ final class ProductMessageController extends AbstractController
             ->setUser($user)
             ->setContent($content);
 
-        $em->persist($message);
+
+        $em->persist(
+            $message
+        );
 
 
         /*
-         * Puisque l'utilisateur est dans la discussion lorsqu'il
-         * écrit, on considère également les messages précédents lus.
+         * ===============================================
+         * DISCUSSION CONSIDÉRÉE COMME LUE
+         * ===============================================
+         *
+         * L'utilisateur est actuellement dans la
+         * discussion puisqu'il vient d'écrire.
          */
+
         $participation->setDiscussionReadAt(
             new \DateTimeImmutable()
         );
 
+
         $em->flush();
+
+
+        /*
+         * ===============================================
+         * TURBO
+         * ===============================================
+         *
+         * Au lieu de recharger la wishlist,
+         * on renvoie seulement les modifications DOM.
+         */
+
+        if (
+            TurboBundle::STREAM_FORMAT
+            === $request->getPreferredFormat()
+        ) {
+            $request->setRequestFormat(
+                TurboBundle::STREAM_FORMAT
+            );
+
+            return $this->renderBlock(
+                'product_message/create.stream.html.twig',
+                'success_stream',
+                [
+                    'message' => $message,
+                    'product' => $product,
+                ]
+            );
+        }
+
+
+        /*
+         * ===============================================
+         * FALLBACK SANS TURBO
+         * ===============================================
+         *
+         * Si JavaScript/Turbo n'est pas disponible,
+         * l'application continue quand même à fonctionner.
+         */
 
         return $this->redirectToRoute(
             'app_wishlist',
             [
                 'token' => $token,
                 'discussion' => $product->getId(),
-            ]
+            ],
+            Response::HTTP_SEE_OTHER
         );
     }
 
+
+    /*
+     * ==========================================================
+     * MARQUER LA DISCUSSION COMME LUE
+     * ==========================================================
+     */
 
     #[Route(
         '/wishlist/{token}/product/{id}/discussion/read',
@@ -171,20 +245,27 @@ final class ProductMessageController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
     ): JsonResponse {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        $this->denyAccessUnlessGranted(
+            'IS_AUTHENTICATED_FULLY'
+        );
 
         $user = $this->getUser();
 
 
         /*
          * ===============================================
-         * VÉRIFIER LA WISHLIST
+         * WISHLIST
          * ===============================================
          */
 
-        if ($product->getWishlist()?->getAccessToken() !== $token) {
+        if (
+            $product->getWishlist()?->getAccessToken()
+            !== $token
+        ) {
             return new JsonResponse(
-                ['success' => false],
+                [
+                    'success' => false,
+                ],
                 404
             );
         }
@@ -192,16 +273,20 @@ final class ProductMessageController extends AbstractController
 
         /*
          * ===============================================
-         * VÉRIFIER LE CSRF
+         * CSRF
          * ===============================================
          */
 
-        if (!$this->isCsrfTokenValid(
-            'discussion-read-' . $product->getId(),
-            (string) $request->request->get('_token')
-        )) {
+        if (
+            !$this->isCsrfTokenValid(
+                'discussion-read-' . $product->getId(),
+                (string) $request->request->get('_token')
+            )
+        ) {
             return new JsonResponse(
-                ['success' => false],
+                [
+                    'success' => false,
+                ],
                 403
             );
         }
@@ -209,7 +294,7 @@ final class ProductMessageController extends AbstractController
 
         /*
          * ===============================================
-         * VÉRIFIER QUE L'UTILISATEUR PARTICIPE
+         * PARTICIPATION
          * ===============================================
          */
 
@@ -220,9 +305,13 @@ final class ProductMessageController extends AbstractController
                 'user' => $user,
             ]);
 
+
         if ($participation === null) {
+
             return new JsonResponse(
-                ['success' => false],
+                [
+                    'success' => false,
+                ],
                 403
             );
         }
@@ -230,7 +319,7 @@ final class ProductMessageController extends AbstractController
 
         /*
          * ===============================================
-         * MARQUER LA DISCUSSION COMME LUE
+         * MARQUER COMME LU
          * ===============================================
          */
 
@@ -238,10 +327,73 @@ final class ProductMessageController extends AbstractController
             new \DateTimeImmutable()
         );
 
+
         $em->flush();
+
 
         return new JsonResponse([
             'success' => true,
         ]);
+    }
+
+
+    /*
+     * ==========================================================
+     * ERREUR DE MESSAGE
+     * ==========================================================
+     */
+
+    private function messageError(
+        Request $request,
+        Product $product,
+        string $token,
+        string $error,
+    ): Response {
+
+        /*
+         * ===============================================
+         * ERREUR TURBO
+         * ===============================================
+         */
+
+        if (
+            TurboBundle::STREAM_FORMAT
+            === $request->getPreferredFormat()
+        ) {
+            $request->setRequestFormat(
+                TurboBundle::STREAM_FORMAT
+            );
+
+            return $this->renderBlock(
+                'product_message/create.stream.html.twig',
+                'error_stream',
+                [
+                    'product' => $product,
+                    'error' => $error,
+                ]
+            );
+        }
+
+
+        /*
+         * ===============================================
+         * FALLBACK CLASSIQUE
+         * ===============================================
+         */
+
+        $this->addFlash(
+            'error',
+            $error
+        );
+
+
+        return $this->redirectToRoute(
+            'app_wishlist',
+            [
+                'token' => $token,
+                'discussion' => $product->getId(),
+            ],
+            Response::HTTP_SEE_OTHER
+        );
     }
 }

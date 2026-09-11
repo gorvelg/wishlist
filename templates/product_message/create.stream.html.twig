@@ -1,0 +1,59 @@
+{% block success_stream %}
+
+    {# ========================================================== #}
+    {# SUPPRIMER L'ÉTAT VIDE                                    #}
+    {# ========================================================== #}
+
+    <turbo-stream action="remove" targets="#product-discussion-empty-{{ product.id }}"></turbo-stream>
+
+
+    {# ========================================================== #}
+    {# AJOUTER LE NOUVEAU MESSAGE                               #}
+    {# ========================================================== #}
+
+    <turbo-stream action="append" targets="#product-messages-{{ product.id }}">
+        <template>
+
+            {% include 'components/chat/_message.html.twig' with {
+                message: message
+            } only %}
+
+        </template>
+    </turbo-stream>
+
+
+    {# ========================================================== #}
+    {# METTRE À JOUR LE COMPTEUR                                #}
+    {# ========================================================== #}
+
+    <turbo-stream action="update" targets="#discussion-count-{{ product.id }}">
+        <template>
+            {{ product.messages|length }}
+        </template>
+    </turbo-stream>
+
+
+    {# ========================================================== #}
+    {# SUPPRIMER UNE ÉVENTUELLE ERREUR                          #}
+    {# ========================================================== #}
+
+    <turbo-stream action="update" targets="#discussion-error-{{ product.id }}">
+        <template></template>
+    </turbo-stream>
+
+{% endblock %}
+
+
+{% block error_stream %}
+
+    <turbo-stream action="update" targets="#discussion-error-{{ product.id }}">
+        <template>
+
+            <p class="text-xs text-[#FF6B6B] mt-2">
+                {{ error }}
+            </p>
+
+        </template>
+    </turbo-stream>
+
+{% endblock %}

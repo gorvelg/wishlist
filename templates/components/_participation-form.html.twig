@@ -1,98 +1,103 @@
 {% if app.user and status.value != 'purchased' %}
 
+    {# ========================================================== #}
+    {# PARTICIPATION DE L'UTILISATEUR COURANT                   #}
+    {# ========================================================== #}
+
     {% set myParticipations = productUsers|filter(
         participation => participation.user.id == app.user.id
     ) %}
 
     {% set myParticipation = myParticipations|first %}
 
-    <form
-        method="post"
-        action="{{ path('app_product_purchase', {
-            token: wishlistToken,
-            id: productId
-        }) }}"
-        class="mt-4"
-    >
 
-        <input
-            type="hidden"
-            name="_token"
-            value="{{ csrf_token('purchase-' ~ productId) }}"
-        >
+    {# ========================================================== #}
+    {# FORMULAIRE PARTICIPATION                                 #}
+    {# ========================================================== #}
 
-        <label class="sr-only">
+    <form method="post" action="{{ path('app_product_purchase', {token: wishlistToken, id: productId}) }}" data-turbo="false" class="mt-4">
+
+        <input type="hidden" name="_token" value="{{ csrf_token('purchase-' ~ productId) }}">
+
+
+        {# ====================================================== #}
+        {# LABEL ACCESSIBLE                                      #}
+        {# ====================================================== #}
+
+        <label for="participation-amount-{{ productId }}" class="sr-only">
+
             {% if myParticipation %}
                 Modifier ma participation
             {% else %}
-                Ma participation
+                Montant de ma participation
             {% endif %}
+
         </label>
+
 
         <div class="flex gap-2">
 
+
+            {# ====================================================== #}
+            {# MONTANT                                               #}
+            {# ====================================================== #}
+
             <div class="relative flex-1">
 
-                <input
-                    type="number"
-                    name="amount"
-                    min="0.01"
-                    step="0.01"
-                    value="{{ myParticipation ? myParticipation.amount : '' }}"
-                    placeholder="50"
-                    required
-                    class="w-full rounded-xl bg-white border border-[rgba(45,45,45,0.15)] px-3 py-1.5 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/40"
-                >
+                <input id="participation-amount-{{ productId }}" type="number" name="amount" min="0.01" step="0.01" inputmode="decimal" value="{{ myParticipation ? myParticipation.amount : '' }}" placeholder="50" required class="w-full rounded-xl bg-white border border-[rgba(45,45,45,0.15)] px-3 py-1.5 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/40">
 
-                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#6B6B6B]">
+                <span aria-hidden="true" class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#6B6B6B]">
                     €
                 </span>
 
             </div>
 
-            <button
-                type="submit"
-                class="text-xs font-semibold px-3.5 py-1.5 rounded-lg bg-[#FFE66D] text-[#2D2D2D] hover:bg-[#ffd93d] active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
-            >
+
+            {# ====================================================== #}
+            {# PARTICIPER / MODIFIER                                 #}
+            {# ====================================================== #}
+
+            <button type="submit" class="text-xs font-semibold px-3.5 py-1.5 rounded-lg bg-[#FFE66D] text-[#2D2D2D] hover:bg-[#ffd93d] active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed shrink-0">
+
                 {% if myParticipation %}
                     Modifier
                 {% else %}
                     Participer
                 {% endif %}
+
             </button>
 
         </div>
 
     </form>
 
+
+    {# ========================================================== #}
+    {# PARTICIPATION EXISTANTE                                  #}
+    {# ========================================================== #}
+
     {% if myParticipation %}
 
         <p class="text-xs text-[#6B6B6B] mt-2">
+
             Votre participation actuelle :
-            <strong>
+
+            <strong class="text-[#2D2D2D]">
                 {{ myParticipation.amount|number_format(2, ',', ' ') }} €
             </strong>
+
         </p>
 
-        <form
-            method="post"
-            action="{{ path('app_product_cancel_participation', {
-                token: wishlistToken,
-                id: productId
-            }) }}"
-            class="mt-2"
-        >
 
-            <input
-                type="hidden"
-                name="_token"
-                value="{{ csrf_token('cancel-participation-' ~ productId) }}"
-            >
+        {# ====================================================== #}
+        {# ANNULER LA PARTICIPATION                              #}
+        {# ====================================================== #}
 
-            <button
-                type="submit"
-                class="text-xs text-[#FF6B6B] hover:underline"
-            >
+        <form method="post" action="{{ path('app_product_cancel_participation', {token: wishlistToken, id: productId}) }}" data-turbo="false" class="mt-2">
+
+            <input type="hidden" name="_token" value="{{ csrf_token('cancel-participation-' ~ productId) }}">
+
+            <button type="submit" class="text-xs text-[#FF6B6B] hover:underline">
                 Annuler ma participation
             </button>
 
