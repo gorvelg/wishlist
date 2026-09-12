@@ -16,10 +16,78 @@ export default class extends Controller {
     };
 
     connect() {
+        this.messagesObserver = null;
+
+        if (this.hasMessagesTarget) {
+
+            this.messagesObserver = new MutationObserver(() => {
+
+                /*
+                 * Un nouveau message vient d'être ajouté
+                 * dans la discussion.
+                 */
+
+                if (
+                    this.hasModalTarget
+                    && !this.modalTarget.classList.contains('hidden')
+                ) {
+
+                    /*
+                     * Si la discussion est ouverte :
+                     *
+                     * - on descend automatiquement
+                     * - on marque les messages comme lus
+                     */
+
+                    this.scrollToBottom();
+
+                    this.markAsRead();
+                }
+
+            });
+
+
+            this.messagesObserver.observe(
+                this.messagesTarget,
+                {
+                    childList: true
+                }
+            );
+        }
+
+
+        /*
+         * Ouvrir automatiquement la discussion
+         * après certaines redirections.
+         */
+
         if (this.autoOpenValue) {
             this.open();
         }
     }
+
+
+    /*
+     * ==========================================================
+     * DÉCONNEXION DU CONTROLLER
+     * ==========================================================
+     */
+
+    disconnect() {
+        if (this.messagesObserver) {
+
+            this.messagesObserver.disconnect();
+
+            this.messagesObserver = null;
+        }
+    }
+
+
+    /*
+     * ==========================================================
+     * OUVRIR
+     * ==========================================================
+     */
 
     open() {
         this.modalTarget.classList.remove('hidden');
@@ -28,12 +96,23 @@ export default class extends Controller {
             'overflow-hidden'
         );
 
-        this.closeButtonTarget.focus();
+
+        if (this.hasCloseButtonTarget) {
+            this.closeButtonTarget.focus();
+        }
+
 
         this.scrollToBottom();
 
         this.markAsRead();
     }
+
+
+    /*
+     * ==========================================================
+     * FERMER
+     * ==========================================================
+     */
 
     close() {
         this.modalTarget.classList.add('hidden');
@@ -42,13 +121,16 @@ export default class extends Controller {
             'overflow-hidden'
         );
 
+
         const url = new URL(
             window.location.href
         );
 
+
         url.searchParams.delete(
             'discussion'
         );
+
 
         window.history.replaceState(
             {},
@@ -56,6 +138,13 @@ export default class extends Controller {
             url
         );
     }
+
+
+    /*
+     * ==========================================================
+     * FERMER EN CLIQUANT SUR LE FOND
+     * ==========================================================
+     */
 
     closeBackground(event) {
         if (
@@ -65,35 +154,63 @@ export default class extends Controller {
         }
     }
 
+
+    /*
+     * ==========================================================
+     * SCROLL VERS LE DERNIER MESSAGE
+     * ==========================================================
+     */
+
     scrollToBottom() {
         if (!this.hasMessagesTarget) {
             return;
         }
 
-        this.messagesTarget.scrollTop =
-            this.messagesTarget.scrollHeight;
+
+        requestAnimationFrame(() => {
+
+            this.messagesTarget.scrollTop =
+                this.messagesTarget.scrollHeight;
+
+        });
     }
 
+
+    /*
+     * ==========================================================
+     * APRÈS ENVOI D'UN MESSAGE
+     * ==========================================================
+     */
+
     afterSubmit(event) {
+
         /*
-         * Le POST doit avoir réussi.
+         * Si Symfony renvoie une erreur,
+         * on conserve le texte.
          */
+
         if (!event.detail.success) {
             return;
         }
 
+
         /*
          * Vider le textarea.
          */
+
         if (this.hasInputTarget) {
+
             this.inputTarget.value = '';
+
             this.inputTarget.focus();
         }
 
+
         /*
-         * Le Turbo Stream doit d'abord avoir le temps
-         * d'ajouter le nouveau message dans le DOM.
+         * Turbo doit avoir le temps d'ajouter
+         * le message dans le DOM.
          */
+
         requestAnimationFrame(() => {
 
             this.scrollToBottom();
@@ -101,14 +218,23 @@ export default class extends Controller {
         });
     }
 
+
+    /*
+     * ==========================================================
+     * MARQUER LA DISCUSSION COMME LUE
+     * ==========================================================
+     */
+
     async markAsRead() {
         if (!this.hasReadUrlValue) {
             return;
         }
 
+
         try {
 
             const body = new URLSearchParams();
+
 
             body.append(
                 '_token',
@@ -148,9 +274,14 @@ export default class extends Controller {
             }
 
 
+            /*
+             * Supprimer le badge "non lu".
+             */
+
             if (this.hasBadgeTarget) {
                 this.badgeTarget.remove();
             }
+
 
         } catch (error) {
 

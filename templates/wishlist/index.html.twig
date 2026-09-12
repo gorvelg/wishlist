@@ -1,124 +1,311 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ wishlist.name }}{% endblock %}
+{% block title %}
+    {{ wishlist.name }}
+{% endblock %}
 
 {% block body %}
-    <header class="relative overflow-hidden bg-[#FFF8F0] pt-16 pb-12 px-6">
-        <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-            <div class="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-[#FFE66D] opacity-40">
-            </div>
-            <svg class="absolute top-4 right-16 opacity-30" width="80" height="80" viewBox="0 0 80 80"><polygon points="40,4 76,76 4,76" fill="#4ECDC4"></polygon></svg>
-            <svg class="absolute top-1/2 -left-6 opacity-20" width="60" height="120" viewBox="0 0 60 120"><path d="M30 0 C60 20 0 40 30 60 C60 80 0 100 30 120" stroke="#FF6B6B" stroke-width="6" fill="none" stroke-linecap="round"></path></svg>
-            <div class="absolute -bottom-16 -right-16 w-56 h-56 rounded-full bg-[#C7B8EA] opacity-30"></div><div class="absolute top-1/3 right-8 w-24 h-24 opacity-20" style="background-image: radial-gradient(circle, rgb(255, 107, 107) 2px, transparent 2px); background-size: 10px 10px;">
 
-            </div>
+    {# ========================================================== #}
+    {# MERCURE                                                   #}
+    {#                                                          #}
+    {# UNE SEULE connexion Mercure privée par utilisateur.       #}
+    {# Elle recevra les mises à jour de toutes ses discussions.  #}
+    {# ========================================================== #}
+
+    {% if app.user %}
+
+        {% set mercureUserTopic = 'https://nidou.app/users/' ~ app.user.id ~ '/discussions' %}
+
+        <div {{ turbo_stream_listen(mercureUserTopic, null, {'withCredentials': true}) }}></div>
+
+    {% endif %}
+
+
+    <header class="relative overflow-hidden bg-[#FFF8F0] pt-16 pb-12 px-6">
+
+        {# ====================================================== #}
+        {# DÉCORATION                                            #}
+        {# ====================================================== #}
+
+        <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+
+            <div class="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-[#FFE66D] opacity-40"></div>
+
+            <svg class="absolute top-4 right-16 opacity-30" width="80" height="80" viewBox="0 0 80 80">
+                <polygon points="40,4 76,76 4,76" fill="#4ECDC4"></polygon>
+            </svg>
+
+            <svg class="absolute top-1/2 -left-6 opacity-20" width="60" height="120" viewBox="0 0 60 120">
+                <path d="M30 0 C60 20 0 40 30 60 C60 80 0 100 30 120" stroke="#FF6B6B" stroke-width="6" fill="none" stroke-linecap="round"></path>
+            </svg>
+
+            <div class="absolute -bottom-16 -right-16 w-56 h-56 rounded-full bg-[#C7B8EA] opacity-30"></div>
+
+            <div class="absolute top-1/3 right-8 w-24 h-24 opacity-20" style="background-image: radial-gradient(circle, rgb(255, 107, 107) 2px, transparent 2px); background-size: 10px 10px;"></div>
+
         </div>
+
+
+        {# ====================================================== #}
+        {# CONTENU HEADER                                        #}
+        {# ====================================================== #}
+
         <div class="relative z-10 max-w-3xl mx-auto text-center">
+
+
+            {# ================================================== #}
+            {# DATE                                              #}
+            {# ================================================== #}
+
             <div class="inline-flex items-center gap-2 bg-white border border-[rgba(45,45,45,0.1)] rounded-full px-4 py-1.5 text-xs font-medium text-[#6B6B6B] mb-6 shadow-sm">
-                <span>🌿</span> Janvier 2027
+                <span>🌿</span>
+                Janvier 2027
             </div>
+
+
+            {# ================================================== #}
+            {# NOM DE LA LISTE                                   #}
+            {# ================================================== #}
+
             <h1 class="font-title text-5xl sm:text-6xl font-semibold text-[#2D2D2D] leading-tight mb-3">
                 {{ wishlist.name }}
             </h1>
-            <p class="text-[#6B6B6B] text-lg max-w-md mx-auto leading-relaxed">
-                {{ wishlist.message }}
-            </p>
-            <div class="flex items-center justify-center gap-6 mt-8"><div class="text-center">
-                    <div class="font-title text-3xl font-semibold text-[#2D2D2D]">{{ countProducts }}</div>
-                    <div class="text-xs text-[#6B6B6B] font-medium">Souhaits</div>
-                </div>
-                <div class="w-px h-8 bg-[rgba(45,45,45,0.1)]">
 
-                </div>
-                <div class="text-center">
-                    <div class="font-title text-3xl font-semibold text-[#4ECDC4]">{{ giftedProducts }}</div>
-                    <div class="text-xs text-[#6B6B6B] font-medium">Offerts</div>
-                </div>
-                <div class="w-px h-8 bg-[rgba(45,45,45,0.1)]"></div>
-                <div class="text-center">
-                    <div class="font-title text-3xl font-semibold text-[#FF6B6B]">{{ remainingProducts }}</div>
-                    <div class="text-xs text-[#6B6B6B] font-medium">Restants</div>
-                </div>
-            </div>
-        </div>
-    </header>
-    {% include 'components/_wishlist-rules.html.twig' %}
-<div data-controller="category-filter">
-    <div class="flex items-center justify-between flex-wrap gap-3 max-w-5xl mx-auto px-6 py-6">
 
-        {% include 'components/_category-filter.html.twig' %}
+            {# ================================================== #}
+            {# MESSAGE                                           #}
+            {# ================================================== #}
 
-        <div class="flex flex-wrap items-center gap-3 justify-between">
-            {% if isOwner %}
-                <div
-                    class="flex items-center gap-3"
-                    data-controller="modal"
-                    data-modal-auto-open-value="{{ openProductModal|default(false) ? 'true' : 'false' }}"
-                >
-                <button
-                    class="flex items-center gap-2 bg-[#FF6B6B] text-white text-sm font-semibold px-5 py-2 rounded-full hover:bg-[#e85555] active:scale-95 transition shadow-sm"
-                    type="button"
-                    data-action="click->modal#open"
-                >
-                    <span class="text-base leading-none">+
-                    </span> Ajouter
-                </button>
-                {% include 'components/_product-modal.html.twig' %}
-            </div>
+            {% if wishlist.message %}
+
+                <p class="text-[#6B6B6B] text-lg max-w-md mx-auto leading-relaxed">
+                    {{ wishlist.message }}
+                </p>
+
             {% endif %}
+
+
+            {# ================================================== #}
+            {# STATISTIQUES                                      #}
+            {# ================================================== #}
+
+            <div class="flex items-center justify-center gap-6 mt-8">
+
+
+                {# ================================================== #}
+                {# SOUHAITS                                          #}
+                {# ================================================== #}
+
+                <div class="text-center">
+
+                    <div class="font-title text-3xl font-semibold text-[#2D2D2D]">
+                        {{ countProducts }}
+                    </div>
+
+                    <div class="text-xs text-[#6B6B6B] font-medium">
+                        Souhaits
+                    </div>
+
+                </div>
+
+
+                <div class="w-px h-8 bg-[rgba(45,45,45,0.1)]"></div>
+
+
+                {# ================================================== #}
+                {# OFFERTS                                           #}
+                {# ================================================== #}
+
+                <div class="text-center">
+
+                    <div class="font-title text-3xl font-semibold text-[#4ECDC4]">
+                        {{ giftedProducts }}
+                    </div>
+
+                    <div class="text-xs text-[#6B6B6B] font-medium">
+                        Offerts
+                    </div>
+
+                </div>
+
+
+                <div class="w-px h-8 bg-[rgba(45,45,45,0.1)]"></div>
+
+
+                {# ================================================== #}
+                {# RESTANTS                                          #}
+                {# ================================================== #}
+
+                <div class="text-center">
+
+                    <div class="font-title text-3xl font-semibold text-[#FF6B6B]">
+                        {{ remainingProducts }}
+                    </div>
+
+                    <div class="text-xs text-[#6B6B6B] font-medium">
+                        Restants
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
+
+    </header>
+
+
+    {# ========================================================== #}
+    {# RÈGLES NIDOU                                              #}
+    {# ========================================================== #}
+
+    {% include 'components/_wishlist-rules.html.twig' %}
+
+
+    {# ========================================================== #}
+    {# FILTRES + PRODUITS                                        #}
+    {# ========================================================== #}
+
+    <div data-controller="category-filter">
+
+
+        {# ====================================================== #}
+        {# BARRE D'ACTIONS                                       #}
+        {# ====================================================== #}
+
+        <div class="flex items-center justify-between flex-wrap gap-3 max-w-5xl mx-auto px-6 py-6">
+
+
+            {# ================================================== #}
+            {# FILTRES                                           #}
+            {# ================================================== #}
+
+            {% include 'components/_category-filter.html.twig' %}
+
+
+            {# ================================================== #}
+            {# ACTIONS PROPRIÉTAIRE                              #}
+            {# ================================================== #}
+
+            <div class="flex flex-wrap items-center gap-3 justify-between">
+
+                {% if isOwner %}
+
+                    <div class="flex items-center gap-3" data-controller="modal" data-modal-auto-open-value="{{ openProductModal|default(false) ? 'true' : 'false' }}">
+
+                        <button type="button" data-action="click->modal#open" class="flex items-center gap-2 bg-[#FF6B6B] text-white text-sm font-semibold px-5 py-2 rounded-full hover:bg-[#e85555] active:scale-95 transition shadow-sm">
+
+                            <span class="text-base leading-none">
+                                +
+                            </span>
+
+                            Ajouter
+
+                        </button>
+
+
+                        {% include 'components/_product-modal.html.twig' %}
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        {# ====================================================== #}
+        {# LISTE DES PRODUITS                                    #}
+        {# ====================================================== #}
+
+        <main class="max-w-5xl mx-auto px-6 pb-20">
+
+            <div data-products-container class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+
+                {% for product in products %}
+
+
+                    {# ================================================== #}
+                    {# PARTICIPATION UTILISATEUR                         #}
+                    {# ================================================== #}
+
+                    {% set hasReserved = app.user
+                        and (
+                        product.productUsers|filter(
+                        productUser => productUser.user.id == app.user.id
+                    )|length > 0
+                        )
+                    %}
+
+
+                    {# ================================================== #}
+                    {# WRAPPER PRODUIT POUR FILTRES                      #}
+                    {# ================================================== #}
+
+                    <div data-product-item data-product-category="{{ product.category.value }}" data-product-status="{{ product.status.value }}" data-product-price="{{ product.price }}">
+
+
+                        {# ================================================== #}
+                        {# CARTE PRODUIT                                      #}
+                        {# ================================================== #}
+
+                        {% include 'components/_product-card.html.twig' with {
+
+                            productId: product.id,
+
+                            name: product.name,
+
+                            description: product.description,
+
+                            status: product.status,
+
+                            image: product.image,
+
+                            price: product.price,
+
+                            url: product.url,
+
+                            category: product.category,
+
+                            wishlistToken: wishlist.accessToken,
+
+                            productUsers: product.productUsers,
+
+                            hasReserved: hasReserved,
+
+                            isOwner: isOwner,
+
+                            contributedAmount: product.contributedAmount,
+
+                            remainingAmount: product.remainingAmount,
+
+                            contributionPercent: product.contributionPercent,
+
+                            collaborative: product.collaborative,
+
+                            productMessages: product.messages,
+
+                            openDiscussion: openDiscussionId == product.id,
+
+                            unreadMessageCount: app.user and hasReserved
+                            ? product.getUnreadMessageCountFor(app.user)
+                            : 0,
+
+                            buyer: product.buyer
+
+                        } only %}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </main>
+
     </div>
 
-    <main class="max-w-5xl mx-auto px-6 pb-20">
-
-        <div data-products-container class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-
-            {% for product in products %}
-
-                {% set hasReserved = app.user
-                    and (
-                    product.productUsers|filter(
-                    productUser => productUser.user.id == app.user.id
-                )|length > 0
-                    )
-                %}
-
-                <div
-                    data-product-item
-                    data-product-category="{{ product.category.value }}"
-                    data-product-status="{{ product.status.value }}"
-                    data-product-price="{{ product.price }}"
-                >
-
-                    {% include 'components/_product-card.html.twig' with {
-                        productId: product.id,
-                        name: product.name,
-                        description: product.description,
-                        status: product.status,
-                        image: product.image,
-                        price: product.price,
-                        url: product.url,
-                        category: product.category,
-                        wishlistToken: wishlist.accessToken,
-                        productUsers: product.productUsers,
-                        hasReserved: hasReserved,
-                        isOwner: isOwner,
-                        contributedAmount: product.contributedAmount,
-                        remainingAmount: product.remainingAmount,
-                        contributionPercent: product.contributionPercent,
-                        collaborative: product.collaborative,
-                        productMessages: product.messages,
-                        openDiscussion: openDiscussionId == product.id,
-                        unreadMessageCount: app.user and hasReserved ? product.getUnreadMessageCountFor(app.user) : 0,
-                        buyer: product.buyer,
-                    } only %}
-
-                </div>
-
-            {% endfor %}
-
-        </div>
-
-    </main>
-</div>
 {% endblock %}

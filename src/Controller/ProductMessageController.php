@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\UX\Turbo\TurboBundle;
+use Symfony\Component\Mercure\HubInterface;
+use Symfony\Component\Mercure\Update;
 
 final class ProductMessageController extends AbstractController
 {
@@ -25,6 +27,7 @@ final class ProductMessageController extends AbstractController
         Product $product,
         Request $request,
         EntityManagerInterface $em,
+        HubInterface $hub,
     ): Response {
         $this->denyAccessUnlessGranted(
             'IS_AUTHENTICATED_FULLY'
@@ -178,6 +181,67 @@ final class ProductMessageController extends AbstractController
 
 
         $em->flush();
+
+        /*
+ * ===============================================
+ * TEMPS RÉEL MERCURE
+ * ===============================================
+ *
+ * On diffuse le nouveau message à chaque
+ * participant du cadeau collaboratif.
+ *
+ * Chaque utilisateur possède son propre topic
+ * afin de générer correctement :
+ *
+ * - ses messages à droite
+ * - les messages des autres à gauche
+ */
+
+        foreach ($product->getProductUsers() as $productUser) {
+
+            $participant = $productUser->getUser();
+
+            if ($participant === null) {
+                continue;
+            }
+
+
+            /*
+             * Topic privé de ce participant
+             */
+
+            $topic = sprintf(
+                'https://nidou.app/users/%d/discussions',
+                $participant->getId()
+            );
+
+
+            /*
+             * Génération du Turbo Stream personnalisé
+             */
+
+            $stream = $this->renderView(
+                'product_message/broadcast.stream.html.twig',
+                [
+                    'message' => $message,
+                    'product' => $product,
+                    'viewerUserId' => $participant->getId(),
+                ]
+            );
+
+
+            /*
+             * Diffusion privée
+             */
+
+            $hub->publish(
+                new Update(
+                    $topic,
+                    $stream,
+                    true
+                )
+            );
+        }
 
 
         /*

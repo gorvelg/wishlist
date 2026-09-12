@@ -1,0 +1,18 @@
+<turbo-stream action="remove" targets="#product-discussion-empty-{{ product.id }}"></turbo-stream>
+
+<turbo-stream action="append" targets="#product-messages-{{ product.id }}">
+    <template>
+
+        {% include 'components/chat/_message.html.twig' with {
+            message: message,
+            viewerUserId: viewerUserId
+        } only %}
+
+    </template>
+</turbo-stream>
+
+<turbo-stream action="update" targets="#discussion-count-{{ product.id }}">
+    <template>
+        {{ product.messages|length }}
+    </template>
+</turbo-stream>
