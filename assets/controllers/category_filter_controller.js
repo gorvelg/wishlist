@@ -12,43 +12,20 @@ export default class extends Controller {
             return;
         }
 
-        /*
-         * IMPORTANT :
-         *
-         * On récupère uniquement les éléments produits.
-         * Un élément HTML = un produit.
-         */
         const products = Array.from(
             productsContainer.querySelectorAll('[data-product-item]')
         );
 
         let selectedCategory = 'all';
 
-
-        /*
-         * On mémorise l'ordre initial.
-         */
         products.forEach((product, index) => {
             product.dataset.originalIndex = index;
         });
 
 
-        /*
-         * =============================================
-         * RÉCUPÉRER LE PRIX
-         * =============================================
-         */
-
         const getPrice = (product) => {
             const value = product.dataset.productPrice || '0';
 
-            /*
-             * Exemples acceptés :
-             *
-             * 19.90
-             * 19,90
-             * 1 299,90
-             */
             const normalized = value
                 .replace(/\s/g, '')
                 .replace(',', '.');
@@ -136,11 +113,6 @@ export default class extends Controller {
                 return 0;
             });
 
-
-            /*
-             * On remet les éléments dans la grille
-             * dans leur nouvel ordre.
-             */
             products.forEach((product) => {
                 productsContainer.appendChild(product);
             });

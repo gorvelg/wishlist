@@ -22,22 +22,10 @@ export default class extends Controller {
 
             this.messagesObserver = new MutationObserver(() => {
 
-                /*
-                 * Un nouveau message vient d'être ajouté
-                 * dans la discussion.
-                 */
-
                 if (
                     this.hasModalTarget
                     && !this.modalTarget.classList.contains('hidden')
                 ) {
-
-                    /*
-                     * Si la discussion est ouverte :
-                     *
-                     * - on descend automatiquement
-                     * - on marque les messages comme lus
-                     */
 
                     this.scrollToBottom();
 
@@ -55,23 +43,10 @@ export default class extends Controller {
             );
         }
 
-
-        /*
-         * Ouvrir automatiquement la discussion
-         * après certaines redirections.
-         */
-
         if (this.autoOpenValue) {
             this.open();
         }
     }
-
-
-    /*
-     * ==========================================================
-     * DÉCONNEXION DU CONTROLLER
-     * ==========================================================
-     */
 
     disconnect() {
         if (this.messagesObserver) {
@@ -81,13 +56,6 @@ export default class extends Controller {
             this.messagesObserver = null;
         }
     }
-
-
-    /*
-     * ==========================================================
-     * OUVRIR
-     * ==========================================================
-     */
 
     open() {
         this.modalTarget.classList.remove('hidden');
@@ -106,13 +74,6 @@ export default class extends Controller {
 
         this.markAsRead();
     }
-
-
-    /*
-     * ==========================================================
-     * FERMER
-     * ==========================================================
-     */
 
     close() {
         this.modalTarget.classList.add('hidden');
@@ -139,13 +100,6 @@ export default class extends Controller {
         );
     }
 
-
-    /*
-     * ==========================================================
-     * FERMER EN CLIQUANT SUR LE FOND
-     * ==========================================================
-     */
-
     closeBackground(event) {
         if (
             event.target === event.currentTarget
@@ -153,13 +107,6 @@ export default class extends Controller {
             this.close();
         }
     }
-
-
-    /*
-     * ==========================================================
-     * SCROLL VERS LE DERNIER MESSAGE
-     * ==========================================================
-     */
 
     scrollToBottom() {
         if (!this.hasMessagesTarget) {
@@ -174,13 +121,6 @@ export default class extends Controller {
 
         });
     }
-
-
-    /*
-     * ==========================================================
-     * APRÈS ENVOI D'UN MESSAGE
-     * ==========================================================
-     */
 
     afterSubmit(event) {
 
@@ -217,13 +157,6 @@ export default class extends Controller {
 
         });
     }
-
-
-    /*
-     * ==========================================================
-     * MARQUER LA DISCUSSION COMME LUE
-     * ==========================================================
-     */
 
     async markAsRead() {
         if (!this.hasReadUrlValue) {
@@ -272,11 +205,6 @@ export default class extends Controller {
             if (!data.success) {
                 return;
             }
-
-
-            /*
-             * Supprimer le badge "non lu".
-             */
 
             if (this.hasBadgeTarget) {
                 this.badgeTarget.remove();

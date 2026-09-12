@@ -11,8 +11,24 @@
     </template>
 </turbo-stream>
 
+
 <turbo-stream action="update" targets="#discussion-count-{{ product.id }}">
     <template>
         {{ product.messages|length }}
+    </template>
+</turbo-stream>
+
+
+<turbo-stream action="update" targets="#discussion-unread-{{ product.id }}">
+    <template>
+
+        {% if unreadMessageCount > 0 %}
+
+            <span data-discussion-target="badge" aria-label="{{ unreadMessageCount }} message{% if unreadMessageCount > 1 %}s{% endif %} non lu{% if unreadMessageCount > 1 %}s{% endif %}" class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-[#FF6B6B] text-white text-[10px] font-semibold">
+                {{ unreadMessageCount }}
+            </span>
+
+        {% endif %}
+
     </template>
 </turbo-stream>

@@ -1,0 +1,41 @@
+<div data-delete-product-target="modal" data-action="click->delete-product#closeBackground keydown.esc@window->delete-product#close" class="hidden fixed inset-0 z-[100] bg-black/30 backdrop-blur-[1px] flex items-center justify-center p-4">
+
+    <div role="dialog" aria-modal="true" aria-labelledby="delete-product-title-{{ productId }}" class="w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden">
+
+        <div class="p-6 text-center">
+
+            <div class="flex items-center justify-center mx-auto size-12 rounded-full bg-red-50 text-[#FF6B6B] mb-4">
+                {% include 'components/icons/trash.html.twig' %}
+            </div>
+
+            <h2 id="delete-product-title-{{ productId }}" class="font-title text-2xl font-semibold text-[#2D2D2D]">
+                Supprimer ce produit ?
+            </h2>
+
+            <p class="text-sm text-[#6B6B6B] mt-2 leading-relaxed">
+                Le produit <strong class="text-[#2D2D2D]">{{ name }}</strong> sera définitivement supprimé de la liste.
+            </p>
+
+        </div>
+
+        <div class="flex items-center gap-3 px-6 pb-6">
+
+            <button type="button" data-delete-product-target="cancelButton" data-action="click->delete-product#close" class="flex-1 text-sm font-semibold px-4 py-2.5 rounded-xl bg-[#FFF8F0] border border-[rgba(45,45,45,0.12)] text-[#2D2D2D] hover:bg-[#FFE66D] active:scale-95 transition">
+                Annuler
+            </button>
+
+            <form method="post" action="{{ path('app_product_delete', {id: productId}) }}" class="flex-1">
+
+                <input type="hidden" name="_token" value="{{ csrf_token('delete_product_' ~ productId) }}">
+
+                <button type="submit" class="w-full text-sm font-semibold px-4 py-2.5 rounded-xl bg-[#FF6B6B] text-white hover:bg-[#e85555] active:scale-95 transition">
+                    Supprimer
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

@@ -6,13 +6,6 @@
 
 {% block body %}
 
-    {# ========================================================== #}
-    {# MERCURE                                                   #}
-    {#                                                          #}
-    {# UNE SEULE connexion Mercure privée par utilisateur.       #}
-    {# Elle recevra les mises à jour de toutes ses discussions.  #}
-    {# ========================================================== #}
-
     {% if app.user %}
 
         {% set mercureUserTopic = 'https://nidou.app/users/' ~ app.user.id ~ '/discussions' %}
@@ -23,10 +16,6 @@
 
 
     <header class="relative overflow-hidden bg-[#FFF8F0] pt-16 pb-12 px-6">
-
-        {# ====================================================== #}
-        {# DÉCORATION                                            #}
-        {# ====================================================== #}
 
         <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
 
@@ -46,36 +35,16 @@
 
         </div>
 
-
-        {# ====================================================== #}
-        {# CONTENU HEADER                                        #}
-        {# ====================================================== #}
-
         <div class="relative z-10 max-w-3xl mx-auto text-center">
-
-
-            {# ================================================== #}
-            {# DATE                                              #}
-            {# ================================================== #}
 
             <div class="inline-flex items-center gap-2 bg-white border border-[rgba(45,45,45,0.1)] rounded-full px-4 py-1.5 text-xs font-medium text-[#6B6B6B] mb-6 shadow-sm">
                 <span>🌿</span>
                 Janvier 2027
             </div>
 
-
-            {# ================================================== #}
-            {# NOM DE LA LISTE                                   #}
-            {# ================================================== #}
-
             <h1 class="font-title text-5xl sm:text-6xl font-semibold text-[#2D2D2D] leading-tight mb-3">
                 {{ wishlist.name }}
             </h1>
-
-
-            {# ================================================== #}
-            {# MESSAGE                                           #}
-            {# ================================================== #}
 
             {% if wishlist.message %}
 
@@ -85,17 +54,7 @@
 
             {% endif %}
 
-
-            {# ================================================== #}
-            {# STATISTIQUES                                      #}
-            {# ================================================== #}
-
             <div class="flex items-center justify-center gap-6 mt-8">
-
-
-                {# ================================================== #}
-                {# SOUHAITS                                          #}
-                {# ================================================== #}
 
                 <div class="text-center">
 
@@ -112,11 +71,6 @@
 
                 <div class="w-px h-8 bg-[rgba(45,45,45,0.1)]"></div>
 
-
-                {# ================================================== #}
-                {# OFFERTS                                           #}
-                {# ================================================== #}
-
                 <div class="text-center">
 
                     <div class="font-title text-3xl font-semibold text-[#4ECDC4]">
@@ -131,11 +85,6 @@
 
 
                 <div class="w-px h-8 bg-[rgba(45,45,45,0.1)]"></div>
-
-
-                {# ================================================== #}
-                {# RESTANTS                                          #}
-                {# ================================================== #}
 
                 <div class="text-center">
 

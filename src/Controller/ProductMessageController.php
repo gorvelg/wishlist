@@ -35,13 +35,6 @@ final class ProductMessageController extends AbstractController
 
         $user = $this->getUser();
 
-
-        /*
-         * ===============================================
-         * VÉRIFIER LA WISHLIST
-         * ===============================================
-         */
-
         if (
             $product->getWishlist()?->getAccessToken()
             !== $token
@@ -49,25 +42,11 @@ final class ProductMessageController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-
-        /*
-         * ===============================================
-         * UNIQUEMENT CADEAU COLLABORATIF
-         * ===============================================
-         */
-
         if (!$product->isCollaborative()) {
             throw $this->createAccessDeniedException(
                 'Cette discussion n’est pas disponible.'
             );
         }
-
-
-        /*
-         * ===============================================
-         * VÉRIFIER QUE L'UTILISATEUR PARTICIPE
-         * ===============================================
-         */
 
         $participation = $em
             ->getRepository(ProductUser::class)
@@ -83,13 +62,6 @@ final class ProductMessageController extends AbstractController
             );
         }
 
-
-        /*
-         * ===============================================
-         * CSRF
-         * ===============================================
-         */
-
         if (
             !$this->isCsrfTokenValid(
                 'product-message-' . $product->getId(),
@@ -101,23 +73,10 @@ final class ProductMessageController extends AbstractController
             );
         }
 
-
-        /*
-         * ===============================================
-         * CONTENU DU MESSAGE
-         * ===============================================
-         */
-
         $content = trim(
             (string) $request->request->get('content')
         );
 
-
-        /*
-         * ===============================================
-         * MESSAGE VIDE
-         * ===============================================
-         */
 
         if ($content === '') {
 
@@ -129,13 +88,6 @@ final class ProductMessageController extends AbstractController
             );
         }
 
-
-        /*
-         * ===============================================
-         * MESSAGE TROP LONG
-         * ===============================================
-         */
-
         if (mb_strlen($content) > 1000) {
 
             return $this->messageError(
@@ -146,34 +98,15 @@ final class ProductMessageController extends AbstractController
             );
         }
 
-
-        /*
-         * ===============================================
-         * CRÉATION DU MESSAGE
-         * ===============================================
-         */
-
         $message = new ProductMessage();
 
         $message
-            ->setProduct($product)
             ->setUser($user)
             ->setContent($content);
 
+        $product->addMessage($message);
 
-        $em->persist(
-            $message
-        );
-
-
-        /*
-         * ===============================================
-         * DISCUSSION CONSIDÉRÉE COMME LUE
-         * ===============================================
-         *
-         * L'utilisateur est actuellement dans la
-         * discussion puisqu'il vient d'écrire.
-         */
+        $em->persist($message);
 
         $participation->setDiscussionReadAt(
             new \DateTimeImmutable()
@@ -181,21 +114,6 @@ final class ProductMessageController extends AbstractController
 
 
         $em->flush();
-
-        /*
- * ===============================================
- * TEMPS RÉEL MERCURE
- * ===============================================
- *
- * On diffuse le nouveau message à chaque
- * participant du cadeau collaboratif.
- *
- * Chaque utilisateur possède son propre topic
- * afin de générer correctement :
- *
- * - ses messages à droite
- * - les messages des autres à gauche
- */
 
         foreach ($product->getProductUsers() as $productUser) {
 
@@ -205,19 +123,22 @@ final class ProductMessageController extends AbstractController
                 continue;
             }
 
-
-            /*
-             * Topic privé de ce participant
-             */
-
             $topic = sprintf(
                 'https://nidou.app/users/%d/discussions',
                 $participant->getId()
             );
 
 
+            $unreadMessageCount =
+                $product->getUnreadMessageCountFor(
+                    $participant
+                );
+
+
             /*
-             * Génération du Turbo Stream personnalisé
+             * ===============================================
+             * TURBO STREAM PERSONNALISÉ
+             * ===============================================
              */
 
             $stream = $this->renderView(
@@ -226,13 +147,10 @@ final class ProductMessageController extends AbstractController
                     'message' => $message,
                     'product' => $product,
                     'viewerUserId' => $participant->getId(),
+                    'unreadMessageCount' => $unreadMessageCount,
                 ]
             );
 
-
-            /*
-             * Diffusion privée
-             */
 
             $hub->publish(
                 new Update(
@@ -243,15 +161,6 @@ final class ProductMessageController extends AbstractController
             );
         }
 
-
-        /*
-         * ===============================================
-         * TURBO
-         * ===============================================
-         *
-         * Au lieu de recharger la wishlist,
-         * on renvoie seulement les modifications DOM.
-         */
 
         if (
             TurboBundle::STREAM_FORMAT
@@ -272,15 +181,6 @@ final class ProductMessageController extends AbstractController
         }
 
 
-        /*
-         * ===============================================
-         * FALLBACK SANS TURBO
-         * ===============================================
-         *
-         * Si JavaScript/Turbo n'est pas disponible,
-         * l'application continue quand même à fonctionner.
-         */
-
         return $this->redirectToRoute(
             'app_wishlist',
             [
@@ -290,13 +190,6 @@ final class ProductMessageController extends AbstractController
             Response::HTTP_SEE_OTHER
         );
     }
-
-
-    /*
-     * ==========================================================
-     * MARQUER LA DISCUSSION COMME LUE
-     * ==========================================================
-     */
 
     #[Route(
         '/wishlist/{token}/product/{id}/discussion/read',
@@ -315,13 +208,6 @@ final class ProductMessageController extends AbstractController
 
         $user = $this->getUser();
 
-
-        /*
-         * ===============================================
-         * WISHLIST
-         * ===============================================
-         */
-
         if (
             $product->getWishlist()?->getAccessToken()
             !== $token
@@ -334,12 +220,6 @@ final class ProductMessageController extends AbstractController
             );
         }
 
-
-        /*
-         * ===============================================
-         * CSRF
-         * ===============================================
-         */
 
         if (
             !$this->isCsrfTokenValid(
@@ -354,13 +234,6 @@ final class ProductMessageController extends AbstractController
                 403
             );
         }
-
-
-        /*
-         * ===============================================
-         * PARTICIPATION
-         * ===============================================
-         */
 
         $participation = $em
             ->getRepository(ProductUser::class)
@@ -381,12 +254,6 @@ final class ProductMessageController extends AbstractController
         }
 
 
-        /*
-         * ===============================================
-         * MARQUER COMME LU
-         * ===============================================
-         */
-
         $participation->setDiscussionReadAt(
             new \DateTimeImmutable()
         );
@@ -400,25 +267,12 @@ final class ProductMessageController extends AbstractController
         ]);
     }
 
-
-    /*
-     * ==========================================================
-     * ERREUR DE MESSAGE
-     * ==========================================================
-     */
-
     private function messageError(
         Request $request,
         Product $product,
         string $token,
         string $error,
     ): Response {
-
-        /*
-         * ===============================================
-         * ERREUR TURBO
-         * ===============================================
-         */
 
         if (
             TurboBundle::STREAM_FORMAT
@@ -437,13 +291,6 @@ final class ProductMessageController extends AbstractController
                 ]
             );
         }
-
-
-        /*
-         * ===============================================
-         * FALLBACK CLASSIQUE
-         * ===============================================
-         */
 
         $this->addFlash(
             'error',
