@@ -45,8 +45,11 @@
                 </div>
                 <div class="relative hidden lg:block">
                     <div class="relative w-full aspect-square max-w-sm mx-auto">
-                        <div class="absolute inset-4 rounded-3xl overflow-hidden shadow-2xl"><img alt="Adult hand holding tiny baby hand" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1582486225644-aeacf6aa0b1b?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;w=600&amp;q=80"></div>
-                        <div class="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-xl px-4 py-3 flex items-center gap-3 border border-[rgba(45,45,45,0.06)]"><span class="text-2xl">🎀</span>
+                        <div class="absolute inset-4 rounded-3xl overflow-hidden shadow-2xl">
+                            <img src="{{ asset('images/login_baby.jpeg') }}" alt="Adult hand holding tiny baby hand" class="w-full h-full object-cover">
+                        </div>
+                        <div class="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-xl px-4 py-3 flex items-center gap-3 border border-[rgba(45,45,45,0.06)]">
+                                <img src="{{ asset('images/cadeau.png') }}" alt="cadeau" class="size-8">
                             <div>
                                 <p class="text-xs font-semibold text-[#2D2D2D]">Offert par Mamie</p>
                                 <p class="text-[10px] text-[#6B6B6B]">Arche d'éveil en bois</p>
@@ -68,17 +71,23 @@
                 </div>
                 <div class="grid sm:grid-cols-3 gap-8">
                     <div class="group p-8 rounded-3xl border border-[rgba(45,45,45,0.08)] hover:shadow-lg hover:border-[rgba(45,45,45,0.12)] transition-all bg-[#FFF8F0]">
-                        <div class="text-4xl mb-5">🎁</div>
+                        <div class="text-4xl mb-5">
+                            <img src="{{ asset('images/wishlist.png') }}" alt="wishlist" class="size-10">
+                        </div>
                         <h3 class="text-xl font-semibold text-[#2D2D2D] mb-2" style="font-family: Fraunces, Georgia, serif;">Créez votre liste idéale</h3>
                         <p class="text-[#6B6B6B] text-sm leading-relaxed">Classez vos envies par catégorie et par priorité pour que vos proches sachent exactement ce qui vous ferait le plus plaisir.</p>
                     </div>
                     <div class="group p-8 rounded-3xl border border-[rgba(45,45,45,0.08)] hover:shadow-lg hover:border-[rgba(45,45,45,0.12)] transition-all bg-[#FFF8F0]">
-                        <div class="text-4xl mb-5">🎀</div>
+                        <div class="text-4xl mb-5">
+                            <img src="{{ asset('images/cadeau.png') }}" alt="cadeau" class="size-10">
+                        </div>
                         <h3 class="text-xl font-semibold text-[#2D2D2D] mb-2" style="font-family: Fraunces, Georgia, serif;">Chacun choisit son cadeau</h3>
                         <p class="text-[#6B6B6B] text-sm leading-relaxed">Vos proches indiquent ce qu’ils souhaitent offrir : pas de doublons, pas de messages gênants, tout est clair.</p>
                     </div>
                     <div class="group p-8 rounded-3xl border border-[rgba(45,45,45,0.08)] hover:shadow-lg hover:border-[rgba(45,45,45,0.12)] transition-all bg-[#FFF8F0]">
-                        <div class="text-4xl mb-5">🌿</div>
+                        <div class="text-4xl mb-5">
+                            <img src="{{ asset('images/partager.png') }}" alt="partage" class="size-10">
+                        </div>
                         <h3 class="text-xl font-semibold text-[#2D2D2D] mb-2" style="font-family: Fraunces, Georgia, serif;">Partagez en un seul lien</h3>
                         <p class="text-[#6B6B6B] text-sm leading-relaxed">Envoyez simplement votre liste de naissance à vos proches. Un lien suffit pour consulter la liste et choisir un cadeau.</p>
                     </div>
@@ -86,11 +95,11 @@
             </div>
         </section>
         <div class="overflow-hidden h-56 flex">
-            <div class="flex-1 min-w-0 overflow-hidden"><img alt="" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1552819289-824d37ca69d2?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;w=400&amp;q=80"></div>
-            <div class="flex-1 min-w-0 overflow-hidden"><img alt="" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1593793373220-2e51e1c31385?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;w=400&amp;q=80"></div>
-            <div class="flex-1 min-w-0 overflow-hidden"><img alt="" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1510154221590-ff63e90a136f?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;w=400&amp;q=80"></div>
-            <div class="flex-1 min-w-0 overflow-hidden"><img alt="" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1617331140180-e8262094733a?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;w=400&amp;q=80"></div>
-            <div class="flex-1 min-w-0 overflow-hidden"><img alt="" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1774578342155-8d7e44a18bfd?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;w=400&amp;q=80"></div>
+            <img src="{{ asset('images/home_hand.jpeg') }}" alt="Main d'adulte tenant une main de bébé" class="w-full h-full object-cover">
+            <img src="{{ asset('images/home_black-baby.jpeg') }}" alt="bébé noir allongé sur un tapis d'éveil" class="w-full h-full object-cover">
+            <img src="{{ asset('images/home_feet.jpeg') }}" alt="Pieds de bébé" class="w-full h-full object-cover">
+            <img src="{{ asset('images/home_smile-baby.jpeg') }}" alt="bébé qui sourit" class="w-full h-full object-cover">
+            <img src="{{ asset('images/home_baby-bed.jpeg') }}" alt="chambre de bébé épurée" class="w-full h-full object-cover">
         </div>
 {#        <section class="py-20 px-6 bg-[#FFF8F0]">#}
 {#            <div class="max-w-5xl mx-auto">#}
