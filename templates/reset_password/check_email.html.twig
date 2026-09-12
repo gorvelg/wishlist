@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Consultez vos e-mails
+{% endblock %}
+
+{% block body %}
+
+    <main class="min-h-screen bg-[#FFF8F0] flex items-center justify-center px-4 py-12">
+
+        <div class="w-full max-w-md">
+
+            <div class="bg-white rounded-3xl border border-[rgba(45,45,45,0.1)] shadow-sm px-6 sm:px-8 py-8 text-center">
+
+                <div class="flex items-center justify-center size-12 mx-auto rounded-full bg-[#4ECDC4]/15 mb-4">
+                    ✉️
+                </div>
+
+                <h1 class="font-title text-3xl font-semibold text-[#2D2D2D]">
+                    Consultez vos e-mails
+                </h1>
+
+                <p class="text-sm text-[#6B6B6B] leading-relaxed mt-3">
+                    Si un compte correspond à cette adresse, nous venons de vous envoyer un lien permettant de réinitialiser votre mot de passe.
+                </p>
+
+                <p class="text-xs text-[#6B6B6B] mt-4">
+                    Le lien est valable pendant {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.
+                </p>
+
+                <a href="{{ path('app_login') }}" class="inline-flex items-center justify-center mt-6 text-sm font-semibold bg-[#2D2D2D] text-white px-5 py-2.5 rounded-full hover:bg-[#444] transition">
+                    Retour à la connexion
+                </a>
+
+            </div>
+
+        </div>
+
+    </main>
+
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Nouveau mot de passe
+{% endblock %}
+
+{% block body %}
+
+    <main class="min-h-screen bg-[#FFF8F0] flex items-center justify-center px-4 py-12">
+
+        <div class="w-full max-w-md">
+
+            <div class="bg-white rounded-3xl border border-[rgba(45,45,45,0.1)] shadow-sm px-6 sm:px-8 py-8">
+
+                <div class="text-center mb-7">
+
+                    <div class="flex items-center justify-center size-12 mx-auto rounded-full bg-[#FFE66D]/40 mb-4">
+                        🔐
+                    </div>
+
+                    <h1 class="font-title text-3xl font-semibold text-[#2D2D2D]">
+                        Nouveau mot de passe
+                    </h1>
+
+                    <p class="text-sm text-[#6B6B6B] leading-relaxed mt-2">
+                        Choisissez un nouveau mot de passe pour votre compte Nidou.
+                    </p>
+
+                </div>
+
+                {{ form_start(resetForm) }}
+
+
+                {# ================================================== #}
+                {# MOT DE PASSE                                      #}
+                {# ================================================== #}
+
+                <div>
+
+                    <label for="{{ resetForm.plainPassword.first.vars.id }}" class="block text-sm font-medium text-[#6B6B6B] mb-1.5">
+                        Nouveau mot de passe
+                    </label>
+
+                    {{ form_widget(resetForm.plainPassword.first, {
+                        attr: {
+                            class: 'w-full rounded-xl border border-[rgba(45,45,45,0.15)] px-4 py-3 text-sm text-[#2D2D2D] focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/40',
+                            autocomplete: 'new-password'
+                        }
+                    }) }}
+
+                </div>
+
+
+                <div class="mt-4">
+
+                    <label for="{{ resetForm.plainPassword.second.vars.id }}" class="block text-sm font-medium text-[#6B6B6B] mb-1.5">
+                        Confirmez le mot de passe
+                    </label>
+
+                    {{ form_widget(resetForm.plainPassword.second, {
+                        attr: {
+                            class: 'w-full rounded-xl border border-[rgba(45,45,45,0.15)] px-4 py-3 text-sm text-[#2D2D2D] focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/40',
+                            autocomplete: 'new-password'
+                        }
+                    }) }}
+
+                </div>
+
+
+                <div class="text-xs text-[#FF6B6B] mt-2">
+                    {{ form_errors(resetForm.plainPassword) }}
+                </div>
+
+
+                <button type="submit" class="w-full mt-5 bg-[#2D2D2D] text-white text-sm font-semibold px-5 py-3 rounded-xl hover:bg-[#444] active:scale-[0.99] transition">
+                    Modifier mon mot de passe
+                </button>
+
+
+                {{ form_end(resetForm) }}
+
+            </div>
+
+        </div>
+
+    </main>
+
+{% endblock %}
