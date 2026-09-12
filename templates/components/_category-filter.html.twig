@@ -7,42 +7,52 @@
     'bedroom' : 'Chambre'
 } %}
 
-<div class="inline-flex flex-wrap items-center gap-2">
+<div class="flex flex-wrap items-center gap-3 w-full">
 
-    <button
-        type="button"
-        data-filter-category="all"
-        class="text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all bg-[#2D2D2D] text-white border-[#2D2D2D] hover:border-[#2D2D2D]"
-    >
-        Tout
-    </button>
+    <div class="w-full overflow-x-auto sm:w-auto sm:overflow-visible">
 
-    {% for key, value in categories %}
-        <button
-            type="button"
-            data-filter-category="{{ key }}"
-            class="text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all bg-white text-[#6B6B6B] border-[rgba(45,45,45,0.15)] hover:border-[#2D2D2D]"
-        >
-            {{ value }}
-        </button>
-    {% endfor %}
+        <div class="flex flex-nowrap items-center gap-2 min-w-max sm:flex-wrap sm:min-w-0">
 
-    <label class="inline-flex items-center gap-2 text-xs font-semibold text-[#6B6B6B] px-3.5 py-1.5 rounded-full border bg-white border-[rgba(45,45,45,0.15)] cursor-pointer">
-        <input
-            type="checkbox"
-            data-available-filter
-            class="accent-[#4ECDC4]"
-        >
-        Seulement disponibles
+            <button type="button" data-filter-category="all" class="shrink-0 whitespace-nowrap text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all bg-[#2D2D2D] text-white border-[#2D2D2D] hover:border-[#2D2D2D]">
+                Tout
+            </button>
+
+            {% for key, value in categories %}
+
+                <button type="button" data-filter-category="{{ key }}" class="shrink-0 whitespace-nowrap text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all bg-white text-[#6B6B6B] border-[rgba(45,45,45,0.15)] hover:border-[#2D2D2D]">
+                    {{ value }}
+                </button>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+    <label class="inline-flex shrink-0 items-center gap-2 text-xs font-semibold text-[#6B6B6B] px-3.5 py-1.5 rounded-full border bg-white border-[rgba(45,45,45,0.15)] cursor-pointer">
+
+        <input type="checkbox" data-available-filter class="accent-[#4ECDC4]">
+
+        <span class="whitespace-nowrap">
+            Seulement disponibles
+        </span>
+
     </label>
 
-    <select
-        data-price-sort
-        class="text-xs font-semibold px-3.5 py-1.5 rounded-full border bg-white text-[#6B6B6B] border-[rgba(45,45,45,0.15)] focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/30"
-    >
-        <option value="default">Tri par défaut</option>
-        <option value="price-asc">Prix croissant</option>
-        <option value="price-desc">Prix décroissant</option>
+    <select data-price-sort class="text-xs font-semibold px-3.5 py-1.5 rounded-full border bg-white text-[#6B6B6B] border-[rgba(45,45,45,0.15)] focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/30">
+
+        <option value="default">
+            Tri par défaut
+        </option>
+
+        <option value="price-asc">
+            Prix croissant
+        </option>
+
+        <option value="price-desc">
+            Prix décroissant
+        </option>
+
     </select>
 
 </div>

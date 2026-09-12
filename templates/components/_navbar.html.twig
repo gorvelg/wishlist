@@ -1,34 +1,140 @@
-<nav class="relative z-20 flex items-center justify-between px-8 py-5 max-w-6xl mx-auto">
-    <img src="{{ asset('images/logo_nidou.png') }}" alt="Nidou" class="h-10 w-auto">
-    {% if app.user is null  %}
-    <div class="flex items-center gap-4">
-        <a
-            class="text-sm font-medium text-[#6B6B6B] hover:text-[#2D2D2D] transition"
-            href="{{ path('app_login', {redirect: app.request.requestUri}) }}"
-            data-discover="true">
-            Se connecter
+<nav data-controller="navbar" class="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+
+    {# ========================================================== #}
+    {# BARRE PRINCIPALE                                          #}
+    {# ========================================================== #}
+
+    <div class="flex items-center justify-between">
+
+        {# ====================================================== #}
+        {# LOGO                                                  #}
+        {# ====================================================== #}
+
+        <a href="{{ path('app_dashboard') }}" class="shrink-0">
+            <img src="{{ asset('images/logo_nidou.png') }}" alt="Nidou" class="h-9 sm:h-10 w-auto">
         </a>
-        <a
-            class="text-sm font-semibold bg-[#2D2D2D] text-white px-5 py-2 rounded-full hover:bg-[#444] active:scale-95 transition"
-            href="{{ path('app_login', {
-                    redirect: app.request.requestUri,
-                    tab: 'register'
-            }) }}"
-            data-discover="true">S'inscrire
-        </a>
-    </div>
-    {% else %}
-        <div class="flex items-center gap-4">
-            <p>Bonjour, {{ app.user.firstname }} </p>
-            <a
-                class="text-sm font-semibold bg-[#2D2D2D] text-white px-5 py-2 rounded-full hover:bg-[#444] active:scale-95 transition"
-                href="{{ path('app_dashboard')
-                }}">
-                Mes listes de naissance
-            </a>
-            <a
-                class="text-sm font-semibold bg-[#FF6B6B] text-white px-5 py-2 rounded-full hover:bg-[#e85555] active:scale-95 transition"
-                href="{{ path('app_logout') }}">Se déconnecter</a>
+
+
+        {# ====================================================== #}
+        {# MENU DESKTOP                                          #}
+        {# ====================================================== #}
+
+        <div class="hidden md:flex items-center gap-4">
+
+            {% if app.user is null %}
+
+                <a href="{{ path('app_login', {redirect: app.request.requestUri}) }}" data-discover="true" class="text-sm font-medium text-[#6B6B6B] hover:text-[#2D2D2D] transition">
+                    Se connecter
+                </a>
+
+                <a href="{{ path('app_login', {redirect: app.request.requestUri, tab: 'register'}) }}" data-discover="true" class="text-sm font-semibold bg-[#2D2D2D] text-white px-5 py-2 rounded-full hover:bg-[#444] active:scale-95 transition">
+                    S'inscrire
+                </a>
+
+            {% else %}
+
+                <p class="text-sm text-[#6B6B6B]">
+                    Bonjour, <span class="font-semibold text-[#2D2D2D]">{{ app.user.firstname }}</span>
+                </p>
+
+                <a href="{{ path('app_dashboard') }}" class="text-sm font-semibold bg-[#2D2D2D] text-white px-5 py-2 rounded-full hover:bg-[#444] active:scale-95 transition">
+                    Mes listes de naissance
+                </a>
+
+                <a href="{{ path('app_logout') }}" class="text-sm font-semibold bg-[#FF6B6B] text-white px-5 py-2 rounded-full hover:bg-[#e85555] active:scale-95 transition">
+                    Se déconnecter
+                </a>
+
+            {% endif %}
+
         </div>
-    {% endif %}
+
+
+        {# ====================================================== #}
+        {# BOUTON MOBILE                                         #}
+        {# ====================================================== #}
+
+        <button type="button" data-action="click->navbar#toggle" aria-label="Ouvrir le menu" class="md:hidden flex items-center justify-center size-10 rounded-full bg-white border border-[rgba(45,45,45,0.1)] text-[#2D2D2D] shadow-sm hover:bg-[#FFF8F0] transition">
+
+            {# ================================================== #}
+            {# ICÔNE MENU                                       #}
+            {# ================================================== #}
+
+            <svg data-navbar-target="openIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5">
+                <line x1="4" y1="6" x2="20" y2="6"></line>
+                <line x1="4" y1="12" x2="20" y2="12"></line>
+                <line x1="4" y1="18" x2="20" y2="18"></line>
+            </svg>
+
+
+            {# ================================================== #}
+            {# ICÔNE FERMER                                     #}
+            {# ================================================== #}
+
+            <svg data-navbar-target="closeIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden size-5">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+
+        </button>
+
+    </div>
+
+
+    {# ========================================================== #}
+    {# MENU MOBILE                                               #}
+    {# ========================================================== #}
+
+    <div data-navbar-target="menu" class="hidden md:hidden mt-4">
+
+        <div class="bg-white border border-[rgba(45,45,45,0.1)] rounded-2xl shadow-lg p-4 flex flex-col gap-3">
+
+            {% if app.user is null %}
+
+                {# ================================================== #}
+                {# NON CONNECTÉ                                     #}
+                {# ================================================== #}
+
+                <a href="{{ path('app_login', {redirect: app.request.requestUri}) }}" data-action="click->navbar#close" data-discover="true" class="w-full text-center text-sm font-medium text-[#6B6B6B] bg-[#FFF8F0] px-4 py-3 rounded-xl hover:text-[#2D2D2D] transition">
+                    Se connecter
+                </a>
+
+                <a href="{{ path('app_login', {redirect: app.request.requestUri, tab: 'register'}) }}" data-action="click->navbar#close" data-discover="true" class="w-full text-center text-sm font-semibold bg-[#2D2D2D] text-white px-4 py-3 rounded-xl hover:bg-[#444] active:scale-95 transition">
+                    S'inscrire
+                </a>
+
+            {% else %}
+
+                {# ================================================== #}
+                {# CONNECTÉ                                         #}
+                {# ================================================== #}
+
+                <div class="px-2 pb-2 border-b border-[rgba(45,45,45,0.08)]">
+
+                    <p class="text-xs text-[#6B6B6B]">
+                        Connecté en tant que
+                    </p>
+
+                    <p class="text-sm font-semibold text-[#2D2D2D] mt-0.5">
+                        {{ app.user.firstname }}
+                    </p>
+
+                </div>
+
+
+                <a href="{{ path('app_dashboard') }}" data-action="click->navbar#close" class="w-full text-center text-sm font-semibold bg-[#2D2D2D] text-white px-4 py-3 rounded-xl hover:bg-[#444] active:scale-95 transition">
+                    Mes listes de naissance
+                </a>
+
+
+                <a href="{{ path('app_logout') }}" data-action="click->navbar#close" class="w-full text-center text-sm font-semibold bg-[#FF6B6B] text-white px-4 py-3 rounded-xl hover:bg-[#e85555] active:scale-95 transition">
+                    Se déconnecter
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
 </nav>
