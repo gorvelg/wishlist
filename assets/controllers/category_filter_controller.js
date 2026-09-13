@@ -57,7 +57,9 @@ export default class extends Controller {
 
                 const matchesStatus =
                     !onlyAvailable
-                    || status === 'available';
+                    || status === 'available'
+                    || status === 'buying'
+                ;
 
                 /*
                  * hidden = display:none
