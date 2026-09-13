@@ -11,19 +11,7 @@ final class ProductImporter
 
     public function __construct(HttpClientInterface $httpClient)
     {
-        /*
-         * L'URL vient de l'utilisateur.
-         *
-         * On interdit donc l'accès au réseau privé du serveur :
-         *
-         * - localhost
-         * - 127.0.0.1
-         * - 192.168.x.x
-         * - réseau Docker interne
-         * - etc.
-         *
-         * Cela évite notamment les attaques SSRF.
-         */
+
         $this->client = new NoPrivateNetworkHttpClient(
             $httpClient
         );
@@ -39,16 +27,11 @@ final class ProductImporter
      */
     public function extract(string $url): array
     {
-        /*
-         * ==========================================================
-         * URL
-         * ==========================================================
-         */
+
 
         $url = trim(
             $url
         );
-
 
         if (
             !filter_var(
@@ -85,13 +68,6 @@ final class ProductImporter
             );
         }
 
-
-        /*
-         * ==========================================================
-         * TÉLÉCHARGEMENT DE LA PAGE
-         * ==========================================================
-         */
-
         $response = $this->client->request(
             'GET',
             $url,
@@ -111,14 +87,46 @@ final class ProductImporter
         );
 
 
-        $html = $response->getContent();
+        $statusCode = $response->getStatusCode();
+
+        if ($statusCode === 403) {
+            throw new \RuntimeException(
+                'Ce site bloque les imports automatiques.'
+            );
+        }
 
 
-        /*
-         * ==========================================================
-         * PARSING HTML
-         * ==========================================================
-         */
+        if ($statusCode === 429) {
+            throw new \RuntimeException(
+                'Ce site limite temporairement les imports automatiques.'
+            );
+        }
+
+
+        if (
+            $statusCode < 200
+            || $statusCode >= 300
+        ) {
+            throw new \RuntimeException(
+                sprintf(
+                    'Le site a retourné une erreur HTTP %d.',
+                    $statusCode
+                )
+            );
+        }
+
+
+        $html = $response->getContent(
+            false
+        );
+
+
+        if (trim($html) === '') {
+            throw new \RuntimeException(
+                'Le site a retourné une page vide.'
+            );
+        }
+
 
         $dom = new \DOMDocument();
 
@@ -153,34 +161,11 @@ final class ProductImporter
             $dom
         );
 
-
-        /*
-         * ==========================================================
-         * RÉSULTAT
-         * ==========================================================
-         *
-         * Contrairement à l'ancienne version :
-         *
-         * on ne fait PAS de return dès qu'on trouve du JSON-LD.
-         *
-         * Chaque source peut compléter la précédente.
-         */
-
         $name = null;
 
         $image = null;
 
         $price = null;
-
-
-        /*
-         * ==========================================================
-         * 1. JSON-LD
-         * ==========================================================
-         *
-         * C'est généralement la meilleure source pour les pages
-         * produit e-commerce.
-         */
 
         $scripts = $xpath->query(
             '//script[@type="application/ld+json"]'
@@ -212,13 +197,6 @@ final class ProductImporter
 
                 } catch (\JsonException) {
 
-                    /*
-                     * Certains sites possèdent plusieurs blocs
-                     * JSON-LD dont certains sont invalides.
-                     *
-                     * On ignore simplement celui-ci.
-                     */
-
                     continue;
                 }
 
@@ -233,21 +211,12 @@ final class ProductImporter
                 }
 
 
-                /*
-                 * NOM
-                 */
-
                 if ($name === null) {
 
                     $name = $this->cleanString(
                         $product['name'] ?? null
                     );
                 }
-
-
-                /*
-                 * IMAGE
-                 */
 
                 if ($image === null) {
 
@@ -257,9 +226,6 @@ final class ProductImporter
                 }
 
 
-                /*
-                 * PRIX
-                 */
 
                 if ($price === null) {
 
@@ -269,10 +235,6 @@ final class ProductImporter
                 }
 
 
-                /*
-                 * Si on a déjà tout trouvé, inutile de continuer
-                 * à parcourir les autres blocs JSON-LD.
-                 */
 
                 if (
                     $name !== null
@@ -284,14 +246,6 @@ final class ProductImporter
             }
         }
 
-
-        /*
-         * ==========================================================
-         * 2. OPEN GRAPH / TWITTER
-         * ==========================================================
-         *
-         * On complète uniquement les informations manquantes.
-         */
 
         if ($name === null) {
 
@@ -352,20 +306,6 @@ final class ProductImporter
         }
 
 
-        /*
-         * ==========================================================
-         * 3. MICRODATA / SCHEMA.ORG
-         * ==========================================================
-         *
-         * Certains sites utilisent :
-         *
-         * <meta itemprop="price" content="49.99">
-         *
-         * ou
-         *
-         * <span itemprop="price" content="49.99">
-         */
-
         if ($name === null) {
 
             $name =
@@ -425,12 +365,6 @@ final class ProductImporter
         }
 
 
-        /*
-         * ==========================================================
-         * 4. META HTML CLASSIQUES
-         * ==========================================================
-         */
-
         if ($name === null) {
 
             $name =
@@ -459,14 +393,6 @@ final class ProductImporter
         }
 
 
-        /*
-         * ==========================================================
-         * 5. BALISE <title>
-         * ==========================================================
-         *
-         * Dernier fallback pour le nom.
-         */
-
         if ($name === null) {
 
             $name = $this->text(
@@ -475,16 +401,6 @@ final class ProductImporter
             );
         }
 
-
-        /*
-         * ==========================================================
-         * 6. LINK IMAGE_SRC
-         * ==========================================================
-         *
-         * Quelques sites utilisent encore :
-         *
-         * <link rel="image_src" href="...">
-         */
 
         if ($image === null) {
 
@@ -496,23 +412,11 @@ final class ProductImporter
         }
 
 
-        /*
-         * ==========================================================
-         * URL ABSOLUE DE L'IMAGE
-         * ==========================================================
-         */
 
         $image = $this->absoluteUrl(
             $image,
             $url
         );
-
-
-        /*
-         * ==========================================================
-         * RÉSULTAT
-         * ==========================================================
-         */
 
         return [
             'name' => $this->cleanString(
@@ -527,28 +431,6 @@ final class ProductImporter
         ];
     }
 
-
-    /*
-     * ==============================================================
-     * TROUVER UN PRODUCT DANS DU JSON-LD
-     * ==============================================================
-     *
-     * Cela supporte notamment :
-     *
-     * {
-     *     "@type": "Product"
-     * }
-     *
-     * mais également :
-     *
-     * {
-     *     "@graph": [
-     *         {
-     *             "@type": "Product"
-     *         }
-     *     ]
-     * }
-     */
 
     private function findProduct(
         mixed $data
@@ -577,7 +459,6 @@ final class ProductImporter
             return $data;
         }
 
-
         foreach ($data as $value) {
 
             if (!is_array($value)) {
@@ -599,13 +480,6 @@ final class ProductImporter
         return null;
     }
 
-
-    /*
-     * ==============================================================
-     * EXTRACTION DU PRIX JSON-LD
-     * ==============================================================
-     */
-
     private function extractPrice(
         mixed $offers
     ): ?string {
@@ -614,17 +488,6 @@ final class ProductImporter
             return null;
         }
 
-
-        /*
-         * Plusieurs offres.
-         *
-         * Exemple :
-         *
-         * "offers": [
-         *     {...},
-         *     {...}
-         * ]
-         */
 
         if (array_is_list($offers)) {
 
@@ -645,10 +508,6 @@ final class ProductImporter
         }
 
 
-        /*
-         * Prix classique.
-         */
-
         $price =
             $offers['price']
             ?? $offers['lowPrice']
@@ -665,30 +524,12 @@ final class ProductImporter
         }
 
 
-        /*
-         * ==========================================================
-         * PRICE SPECIFICATION
-         * ==========================================================
-         *
-         * Exemple :
-         *
-         * "offers": {
-         *     "priceSpecification": {
-         *         "price": "129.90"
-         *     }
-         * }
-         */
-
         $priceSpecification =
             $offers['priceSpecification']
             ?? null;
 
 
         if (is_array($priceSpecification)) {
-
-            /*
-             * Plusieurs PriceSpecification.
-             */
 
             if (
                 array_is_list(
@@ -719,9 +560,6 @@ final class ProductImporter
 
             } else {
 
-                /*
-                 * Une seule PriceSpecification.
-                 */
 
                 $normalized = $this->normalizePrice(
                     $priceSpecification['price']
@@ -738,22 +576,6 @@ final class ProductImporter
 
         return null;
     }
-
-
-    /*
-     * ==============================================================
-     * NORMALISATION DU PRIX
-     * ==============================================================
-     *
-     * Comprend notamment :
-     *
-     * 21.90
-     * 21,90
-     * 21,90 €
-     * 1 299,90 €
-     * 1.299,90 €
-     * 1,299.90
-     */
 
     private function normalizePrice(
         mixed $price
@@ -778,11 +600,6 @@ final class ProductImporter
         }
 
 
-        /*
-         * Suppression des espaces classiques,
-         * insécables et fines insécables.
-         */
-
         $price = str_replace(
             [
                 "\u{00A0}",
@@ -794,14 +611,6 @@ final class ProductImporter
         );
 
 
-        /*
-         * On ne conserve que :
-         *
-         * - chiffres
-         * - virgule
-         * - point
-         * - signe moins
-         */
 
         $price = preg_replace(
             '/[^\d,.\-]/u',
@@ -818,20 +627,6 @@ final class ProductImporter
         }
 
 
-        /*
-         * ==========================================================
-         * VIRGULE + POINT
-         * ==========================================================
-         *
-         * Le dernier séparateur rencontré est considéré
-         * comme séparateur décimal.
-         *
-         * 1.299,99
-         * → 1299.99
-         *
-         * 1,299.99
-         * → 1299.99
-         */
 
         if (
             str_contains(
@@ -863,16 +658,16 @@ final class ProductImporter
                 && $lastDot !== false
             ) {
 
+                /*
+                 * Format européen :
+                 *
+                 * 1.299,90
+                 */
+
                 if (
                     $lastComma
                     > $lastDot
                 ) {
-
-                    /*
-                     * Format européen :
-                     *
-                     * 1.299,99
-                     */
 
                     $price = str_replace(
                         '.',
@@ -910,9 +705,6 @@ final class ProductImporter
             )
         ) {
 
-            /*
-             * Une ou plusieurs virgules.
-             */
 
             $parts = explode(
                 ',',
@@ -953,17 +745,6 @@ final class ProductImporter
                 '.'
             )
         ) {
-
-            /*
-             * Plusieurs points.
-             *
-             * Exemple :
-             *
-             * 1.299.90
-             *
-             * Cas très rare mais on essaie tout de même
-             * de rester tolérant.
-             */
 
             if (
                 substr_count(
@@ -1009,15 +790,11 @@ final class ProductImporter
             }
         }
 
-
         if (!is_numeric($price)) {
             return null;
         }
 
 
-        /*
-         * Pas de prix négatif.
-         */
 
         if ((float) $price < 0) {
             return null;
@@ -1028,19 +805,9 @@ final class ProductImporter
     }
 
 
-    /*
-     * ==============================================================
-     * IMAGE JSON-LD
-     * ==============================================================
-     */
-
     private function extractImage(
         mixed $image
     ): ?string {
-
-        /*
-         * URL simple.
-         */
 
         if (is_string($image)) {
 
@@ -1053,11 +820,6 @@ final class ProductImporter
         if (!is_array($image)) {
             return null;
         }
-
-
-        /*
-         * ImageObject.
-         */
 
         if (
             isset($image['url'])
@@ -1083,11 +845,6 @@ final class ProductImporter
                 $image['contentUrl']
             );
         }
-
-
-        /*
-         * Tableau d'images.
-         */
 
         $first =
             $image[0]
@@ -1134,17 +891,6 @@ final class ProductImporter
         return null;
     }
 
-
-    /*
-     * ==============================================================
-     * META
-     * ==============================================================
-     *
-     * Exemple :
-     *
-     * <meta property="og:title" content="Poussette">
-     */
-
     private function meta(
         \DOMXPath $xpath,
         string $attribute,
@@ -1185,20 +931,6 @@ final class ProductImporter
         );
     }
 
-
-    /*
-     * ==============================================================
-     * ATTRIBUT HTML
-     * ==============================================================
-     *
-     * Permet par exemple de lire :
-     *
-     * <img itemprop="image" src="...">
-     *
-     * ou :
-     *
-     * <span itemprop="price" content="29.90">
-     */
 
     private function attribute(
         \DOMXPath $xpath,
@@ -1243,16 +975,6 @@ final class ProductImporter
     }
 
 
-    /*
-     * ==============================================================
-     * CONTENU TEXTE HTML
-     * ==============================================================
-     *
-     * Sert principalement à récupérer :
-     *
-     * <title>...</title>
-     */
-
     private function text(
         \DOMXPath $xpath,
         string $query
@@ -1284,12 +1006,6 @@ final class ProductImporter
     }
 
 
-    /*
-     * ==============================================================
-     * NETTOYAGE CHAÎNE
-     * ==============================================================
-     */
-
     private function cleanString(
         mixed $value
     ): ?string {
@@ -1313,20 +1029,6 @@ final class ProductImporter
             : null;
     }
 
-
-    /*
-     * ==============================================================
-     * URL IMAGE ABSOLUE
-     * ==============================================================
-     *
-     * Exemple :
-     *
-     * /images/product.jpg
-     *
-     * devient :
-     *
-     * https://site.fr/images/product.jpg
-     */
 
     private function absoluteUrl(
         ?string $value,
@@ -1375,12 +1077,6 @@ final class ProductImporter
         }
 
 
-        /*
-         * URL protocol-relative :
-         *
-         * //cdn.site.fr/image.jpg
-         */
-
         if (
             str_starts_with(
                 $value,
@@ -1416,12 +1112,6 @@ final class ProductImporter
                 . $parts['port'];
         }
 
-
-        /*
-         * URL relative à la racine.
-         *
-         * /media/product.jpg
-         */
 
         if (
             str_starts_with(
