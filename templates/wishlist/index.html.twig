@@ -203,43 +203,25 @@
                         {# ================================================== #}
 
                         {% include 'components/_product-card.html.twig' with {
-
                             productId: product.id,
-
                             name: product.name,
-
                             description: product.description,
-
                             status: product.status,
-
                             image: product.image,
-
                             price: product.price,
-
                             url: product.url,
-
                             category: product.category,
-
                             wishlistToken: wishlist.accessToken,
-
                             productUsers: product.productUsers,
-
                             hasReserved: hasReserved,
-
                             isOwner: isOwner,
-
                             contributedAmount: product.contributedAmount,
-
                             remainingAmount: product.remainingAmount,
-
                             contributionPercent: product.contributionPercent,
-
                             collaborative: product.collaborative,
-
                             productMessages: product.messages,
 
                             openDiscussion: openDiscussionId == product.id,
-
                             unreadMessageCount: app.user and hasReserved
                             ? product.getUnreadMessageCountFor(app.user)
                             : 0,

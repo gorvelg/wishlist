@@ -496,7 +496,7 @@
                     <div class="flex-1">
 
                         <p class="text-xs font-semibold text-[#2D2D2D]">
-                            Ce cadeau est pris en charge
+                            Ce cadeau est réservé
                         </p>
 
 
@@ -508,8 +508,10 @@
 
                         {% else %}
 
+                            {% set reserver = productUsers|first %}
+
                             <p class="text-xs text-[#6B6B6B]">
-                                Quelqu'un a choisi de l'offrir.
+                                {{ reserver.user.firstname }} {{ reserver.user.lastname|slice(0, 1)|upper }}. a choisi de l'offrir.
                             </p>
 
                         {% endif %}
@@ -540,7 +542,7 @@
 
             {% if url %}
 
-                <a href="{{ url }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-xs font-semibold text-white bg-[#4ECDC4] hover:bg-[#3ab8b0] active:scale-95 transition px-3.5 py-2 rounded-lg">
+                <a href="{{ url }}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center w-full gap-1 text-xs font-semibold text-white bg-[#4ECDC4] hover:bg-[#3ab8b0] active:scale-95 transition px-3.5 py-2 rounded-lg">
                     Voir le produit
                 </a>
 
