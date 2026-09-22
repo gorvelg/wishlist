@@ -940,6 +940,10 @@ final class WishlistController extends AbstractController
         $product->addProductUser($productUser);
         $product->setStatus(ProductStatus::BUYING);
 
+        if (!$product->isCollaborative() && !$product->getProductUsers()->isEmpty()) {
+            $product->setStatus(ProductStatus::RESERVED);
+        }
+
         $em->persist($productUser);
         $em->flush();
 
