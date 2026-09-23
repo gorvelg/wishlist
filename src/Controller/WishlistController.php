@@ -8,6 +8,7 @@ use App\Entity\Wishlist;
 use App\Entity\WishlistOwner;
 use App\Enum\ProductStatus;
 use App\Form\ProductType;
+use App\Service\ProductImageUploader;
 use App\Service\ProductImporter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,7 +16,6 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\String\Slugger\SluggerInterface;
 
 final class WishlistController extends AbstractController
 {
@@ -23,9 +23,10 @@ final class WishlistController extends AbstractController
     public function index(
         string $token,
         Request $request,
-        SluggerInterface $slugger,
         EntityManagerInterface $em,
         ProductImporter $productImporter,
+        ProductImageUploader $productImageUploader,
+
     ): Response {
 
         $wishlist = $em
@@ -167,34 +168,18 @@ final class WishlistController extends AbstractController
 
                 if ($imageFile) {
 
-                    $originalFilename = pathinfo(
-                        $imageFile->getClientOriginalName(),
-                        PATHINFO_FILENAME
-                    );
-
-                    $safeFilename = $slugger->slug(
-                        $originalFilename
-                    );
-
-                    $newFilename =
-                        $safeFilename
-                        . '-'
-                        . uniqid()
-                        . '.'
-                        . $imageFile->guessExtension();
-
                     try {
 
-                        $imageFile->move(
-                            'uploads',
-                            $newFilename
+                        $newFilename = $productImageUploader->replace(
+                            $product->getImage(),
+                            $imageFile
                         );
 
                         $product->setImage(
                             $newFilename
                         );
 
-                    } catch (FileException $e) {
+                    } catch (\Throwable $e) {
 
                         $this->addFlash(
                             'error',
