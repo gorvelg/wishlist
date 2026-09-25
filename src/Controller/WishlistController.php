@@ -619,6 +619,7 @@ final class WishlistController extends AbstractController
         }
 
         if ($product->isCollaborative()) {
+
             if ($product->getStatus() !== ProductStatus::FUNDED) {
                 $this->addFlash(
                     'error',
@@ -627,12 +628,13 @@ final class WishlistController extends AbstractController
 
                 return $this->redirectToRoute(
                     'app_wishlist',
-                    ['token' => $token]
+                    [
+                        'token' => $token,
+                    ]
                 );
             }
 
             if ($product->getBuyer() === null) {
-
                 $this->addFlash(
                     'error',
                     'Aucun participant ne s’est encore chargé de l’achat de ce cadeau.'
@@ -650,7 +652,6 @@ final class WishlistController extends AbstractController
                 $product->getBuyer()?->getId()
                 !== $user->getId()
             ) {
-
                 $this->addFlash(
                     'error',
                     'Seule la personne chargée de l’achat peut marquer ce cadeau comme acheté.'
@@ -665,7 +666,8 @@ final class WishlistController extends AbstractController
             }
 
         } else {
-            if ($product->getStatus() !== ProductStatus::BUYING) {
+
+            if ($product->getStatus() !== ProductStatus::RESERVED) {
                 $this->addFlash(
                     'error',
                     'Ce produit ne peut pas être marqué comme acheté.'
@@ -673,7 +675,9 @@ final class WishlistController extends AbstractController
 
                 return $this->redirectToRoute(
                     'app_wishlist',
-                    ['token' => $token]
+                    [
+                        'token' => $token,
+                    ]
                 );
             }
 
@@ -685,7 +689,6 @@ final class WishlistController extends AbstractController
                 ]);
 
             if ($productUser === null) {
-
                 $this->addFlash(
                     'error',
                     'Vous devez avoir choisi d’offrir ce cadeau avant de pouvoir le marquer comme acheté.'
@@ -820,7 +823,7 @@ final class WishlistController extends AbstractController
                 ? ((float) $product->getRemainingAmount() <= 0.0
                 ? ProductStatus::FUNDED
                 : ProductStatus::BUYING)
-                : ProductStatus::BUYING
+                : ProductStatus::RESERVED
         );
 
         $em->flush();
