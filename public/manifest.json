@@ -1,0 +1,18 @@
+{
+    "name": "Nidou - Créez votre liste de naissance !",
+    "short_name": "Nidou",
+    "start_url": "/",
+    "display": "standalone",
+    "icons": [
+        {
+            "src": "/app-icons/nidou-icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/app-icons/nidou-icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
