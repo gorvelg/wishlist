@@ -393,11 +393,12 @@ final class WishlistController extends AbstractController
                 (float) ($participation->getAmount() ?? 0);
         }
 
-        $maxAmount = max(
+        $maxAmount = round(max(
             0,
             (float) $product->getPrice()
             - $otherContributions
-        );
+        ));
+
 
         if ($amount > $maxAmount) {
 
