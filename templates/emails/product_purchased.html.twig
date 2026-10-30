@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Récapitulatif des Tickets de Caisse</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 30px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .header h1{
+            font-size: 24px;
+        }
+        .content {
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Une belle surprise vous attend !</h1>
+    </div>
+
+    <div class="content">
+        <p>Bonjour <b>{{ firstname }}</b>,</p>
+        <p>Bonne nouvelle ! 🎉</p>
+
+        {% set productUsers = product.productUsers %}
+
+        {% if productUsers|length > 0 %}
+            <p>
+                {% for productUser in productUsers %}
+                    <strong>{{ productUser.user.firstname }}</strong>{% if loop.revindex == 2 %} et {% elseif not loop.last %}, {% endif %}
+                {% endfor %}
+                {% if productUsers|length == 1 %}
+                    a décidé
+                {% else %}
+                    ont décidé
+                {% endif %}
+                de vous faire plaisir en vous offrant {{ product.name }} !
+            </p>
+        {% endif %}
+    </div>
+
+</div>
+</body>
+</html>

@@ -7,11 +7,14 @@ use App\Entity\ProductUser;
 use App\Entity\Wishlist;
 use App\Entity\WishlistOwner;
 use App\Enum\ProductStatus;
+use App\Event\ProductEvent;
 use App\Form\ProductType;
 use App\Service\ProductImageUploader;
 use App\Service\ProductImporter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -577,6 +580,7 @@ final class WishlistController extends AbstractController
         Product $product,
         Request $request,
         EntityManagerInterface $em,
+        EventDispatcherInterface $dispatcher
     ): Response {
         $this->denyAccessUnlessGranted(
             'IS_AUTHENTICATED_FULLY'
@@ -709,6 +713,9 @@ final class WishlistController extends AbstractController
         );
 
         $em->flush();
+
+        $event = new ProductEvent($product);
+        $dispatcher->dispatch($event, ProductEvent::PURCHASED);
 
         $this->addFlash(
             'success',
