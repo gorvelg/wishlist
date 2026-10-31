@@ -13,9 +13,7 @@ use App\Service\ProductImageUploader;
 use App\Service\ProductImporter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -931,7 +929,12 @@ final class WishlistController extends AbstractController
         $productUser = new ProductUser();
         $productUser
             ->setUser($user)
-            ->setAmount($product->getPrice());
+            ->setAmount($product->getPrice())
+            ->setReservationReminderAt(
+                (new \DateTimeImmutable('+20 days'))
+                    ->setTime(0, 0)
+            )
+            ->setIsReminded(false);
 
         $product->addProductUser($productUser);
         $product->setStatus(ProductStatus::BUYING);

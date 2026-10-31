@@ -38,6 +38,12 @@ class ProductUser
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $discussionReadAt = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $reservationReminderAt = null;
+
+    #[ORM\Column]
+    private bool $isReminded = false;
+
     public function __construct()
     {
         $now = new \DateTimeImmutable();
@@ -105,5 +111,29 @@ class ProductUser
     public function setDiscussionReadAt(?\DateTimeImmutable $discussionReadAt): void
     {
         $this->discussionReadAt = $discussionReadAt;
+    }
+
+    public function getReservationReminderAt(): ?\DateTimeImmutable
+    {
+        return $this->reservationReminderAt;
+    }
+
+    public function setReservationReminderAt(?\DateTimeImmutable $reservationReminderAt): static
+    {
+        $this->reservationReminderAt = $reservationReminderAt;
+
+        return $this;
+    }
+
+    public function isReminded(): bool
+    {
+        return $this->isReminded;
+    }
+
+    public function setIsReminded(bool $isReminded): static
+    {
+        $this->isReminded = $isReminded;
+
+        return $this;
     }
 }
