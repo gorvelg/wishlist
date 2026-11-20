@@ -898,6 +898,8 @@ final class WishlistController extends AbstractController
 
         $user = $this->getUser();
 
+        $wishlist = $product->getWishlist();
+
         if ($product->getWishlist()?->getAccessToken() !== $token) {
             throw $this->createNotFoundException();
         }
@@ -927,13 +929,16 @@ final class WishlistController extends AbstractController
         }
 
         $productUser = new ProductUser();
+
+        $dueDate = $wishlist->getDueDate();
+        $reservationReminderAt = $dueDate !== null
+            ? $dueDate->modify('-1 month')->setTime(0, 0)
+            : (new \DateTimeImmutable('+20 days'))->setTime(0, 0);
+
         $productUser
             ->setUser($user)
             ->setAmount($product->getPrice())
-            ->setReservationReminderAt(
-                (new \DateTimeImmutable('+20 days'))
-                    ->setTime(0, 0)
-            )
+            ->setReservationReminderAt($reservationReminderAt)
             ->setIsReminded(false);
 
         $product->addProductUser($productUser);
