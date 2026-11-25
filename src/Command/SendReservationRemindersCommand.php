@@ -109,7 +109,12 @@ class SendReservationRemindersCommand extends Command
                 );
 
             $email = (new TemplatedEmail())
-                ->from('contact@guillaume-gorvel.fr')
+                ->from(
+                    new Address(
+                        'contact@guillaume-gorvel.fr',
+                        'Nidou'
+                    )
+                )
                 ->to(
                     $user->getEmail()
                 )
