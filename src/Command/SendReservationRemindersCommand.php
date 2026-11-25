@@ -130,6 +130,7 @@ class SendReservationRemindersCommand extends Command
                     'product' => $product,
                     'wishlist' => $wishlist,
                     'wishlistUrl' => $wishlistUrl,
+                    'logoUrl' => 'https://nidou.guillaume-gorvel.fr/images/logo_nidou.png',
                 ]);
 
             try {

@@ -3,70 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="x-apple-disable-message-reformatting">
     <title>Votre cadeau est toujours réservé - Nidou</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            color: #333;
-        }
-        .container {
-            max-width: 600px;
-            margin: 30px auto;
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        .header {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 20px;
-        }
-        .header h1{
-            font-size: 24px;
-        }
-        .content {
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .btn-box{
-            display: flex;
-            justify-content: center;
-        }
-        .btn {
-            color: white;
-            font-weight: 800;
-            padding-block: 14px;
-            padding-inline: 32px;
-            background-color: #FF6B6B;
-            border-radius: 50px;
-            font-family: Outfit, system-ui, sans-serif;
-            text-decoration: none;
-        }
-    </style>
 </head>
-<body>
-<div class="container">
-    <div class="header">
-        <h1>Votre cadeau est toujours réservé !</h1>
-    </div>
-    <div class="content">
-        <p>Bonjour {{ user.firstname }},</p>
 
-        <p>Vous avez réservé le cadeau <strong>{{ product.name }}</strong> sur la liste {{ wishlist.name }} il y a maintenant 20 jours.</p>
+<body style="margin:0; padding:0; background-color:#FFF8F0; font-family:Arial, Helvetica, sans-serif; color:#2D2D2D;">
 
-        <p>Si vous avez déjà acheté le cadeau, pensez à l'indiquer sur Nidou.</p>
-
-        <div class="btn-box">
-            <a class="btn" href="{{ wishlistUrl }}">
-                Voir la liste
-            </a>
-        </div>
-    </div>
+<div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent;">
+    Petit rappel de Nidou concernant le cadeau {{ product.name }}.
 </div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#FFF8F0" style="width:100%; margin:0; padding:0; background-color:#FFF8F0;">
+
+    <tr>
+        <td align="center" style="padding:40px 16px;">
+
+            <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px;">
+
+                <tr>
+                    <td align="center" style="padding:0 20px 24px 20px;">
+
+                        <img src="{{ logoUrl }}" alt="Nidou" width="130" style="display:block; width:130px; max-width:130px; height:auto; margin:0 auto; border:0;">
+
+                    </td>
+                </tr>
+
+                <tr>
+                    <td bgcolor="#ffffff" style="background-color:#ffffff; border:1px solid #F0E8DF; border-radius:20px; overflow:hidden;">
+
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+
+                            <tr>
+                                <td align="center" bgcolor="#FFE66D" style="background-color:#FFE66D; padding:10px 20px; font-size:13px; line-height:18px; font-weight:700; color:#2D2D2D;">
+                                    🎁 Petit rappel de Nidou
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td align="center" style="padding:36px 32px 12px 32px;">
+
+                                    <h1 style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:26px; line-height:34px; font-weight:700; color:#2D2D2D;">
+                                        Votre cadeau est toujours réservé !
+                                    </h1>
+
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:10px 32px 0 32px; font-size:16px; line-height:26px; color:#6B6B6B;">
+
+                                    <p style="margin:0 0 18px 0;">
+                                        Bonjour {{ user.firstname }},
+                                    </p>
+
+                                    <p style="margin:0 0 24px 0;">
+                                        Vous aviez choisi d'offrir un cadeau sur la liste
+                                        <strong style="color:#2D2D2D;">{{ wishlist.name }}</strong>.
+                                        Petit rappel pour vérifier que tout est toujours bon de votre côté.
+                                    </p>
+
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0 32px 28px 32px;">
+
+                                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#FFF8F0" style="width:100%; background-color:#FFF8F0; border-radius:14px;">
+
+                                        <tr>
+                                            <td style="padding:20px 22px;">
+
+                                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+
+                                                    <tr>
+                                                        <td valign="middle" width="46" style="width:46px; font-size:28px;">
+                                                            🎁
+                                                        </td>
+
+                                                        <td valign="middle" style="font-family:Arial, Helvetica, sans-serif;">
+
+                                                            <div style="font-size:12px; line-height:18px; color:#8A8A8A; margin-bottom:3px;">
+                                                                Cadeau réservé
+                                                            </div>
+
+                                                            <div style="font-size:16px; line-height:22px; font-weight:700; color:#2D2D2D;">
+                                                                {{ product.name }}
+                                                            </div>
+
+                                                        </td>
+                                                    </tr>
+
+                                                </table>
+
+                                            </td>
+                                        </tr>
+
+                                    </table>
+
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:0 32px 24px 32px; font-size:15px; line-height:24px; color:#6B6B6B;">
+
+                                    <p style="margin:0;">
+                                        Si vous avez déjà acheté ce cadeau, pensez à l'indiquer sur Nidou afin que la liste soit mise à jour pour les autres participants.
+                                    </p>
+
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td align="center" style="padding:8px 32px 38px 32px;">
+
+                                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td align="center" bgcolor="#FF6B6B" style="background-color:#FF6B6B; border-radius:50px;">
+
+                                                <a href="{{ wishlistUrl }}" target="_blank" style="display:inline-block; padding:14px 32px; font-family:Arial, Helvetica, sans-serif; font-size:15px; line-height:20px; font-weight:700; color:#ffffff; text-decoration:none; border-radius:50px;">
+                                                    Voir la liste
+                                                </a>
+
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td align="center" style="padding:22px 30px 26px 30px; border-top:1px solid #F0E8DF;">
+
+                                    <p style="margin:0 0 6px 0; font-size:13px; line-height:20px; font-weight:700; color:#2D2D2D;">
+                                        À bientôt sur Nidou !
+                                    </p>
+
+                                    <p style="margin:0; font-size:11px; line-height:18px; color:#999999;">
+                                        Ce message vous est envoyé automatiquement suite à votre réservation.
+                                    </p>
+
+                                </td>
+                            </tr>
+
+                        </table>
+
+                    </td>
+                </tr>
+
+            </table>
+
+        </td>
+    </tr>
+
+</table>
+
 </body>
 </html>
