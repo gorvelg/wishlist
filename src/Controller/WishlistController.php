@@ -421,7 +421,23 @@ final class WishlistController extends AbstractController
 
         if ($productUser === null) {
             $productUser = new ProductUser();
-            $productUser->setUser($user);
+
+            $wishlist = $product->getWishlist();
+            $dueDate = $wishlist->getDueDate();
+
+            $reservationReminderAt = $dueDate !== null
+                ? $dueDate->modify('-1 month')->setTime(0, 0)
+                : (new \DateTimeImmutable('+20 days'))->setTime(0, 0);
+
+            if ($reservationReminderAt <= new \DateTimeImmutable()) {
+                $reservationReminderAt = (new \DateTimeImmutable('+20 days'))->setTime(0, 0);
+            }
+
+            $productUser
+                ->setUser($user)
+                ->setReservationReminderAt($reservationReminderAt)
+                ->setIsReminded(false);
+
             $product->addProductUser($productUser);
             $em->persist($productUser);
         }
@@ -931,9 +947,14 @@ final class WishlistController extends AbstractController
         $productUser = new ProductUser();
 
         $dueDate = $wishlist->getDueDate();
+
         $reservationReminderAt = $dueDate !== null
             ? $dueDate->modify('-1 month')->setTime(0, 0)
             : (new \DateTimeImmutable('+20 days'))->setTime(0, 0);
+
+        if ($reservationReminderAt <= new \DateTimeImmutable()) {
+            $reservationReminderAt = (new \DateTimeImmutable('+20 days'))->setTime(0, 0);
+        }
 
         $productUser
             ->setUser($user)
@@ -946,6 +967,7 @@ final class WishlistController extends AbstractController
 
         if (!$product->isCollaborative() && !$product->getProductUsers()->isEmpty()) {
             $product->setStatus(ProductStatus::RESERVED);
+
         }
 
         $em->persist($productUser);

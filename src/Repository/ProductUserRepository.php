@@ -22,31 +22,18 @@ class ProductUserRepository extends ServiceEntityRepository
     ): array {
         return $this
             ->createQueryBuilder('productUser')
-            ->join(
-                'productUser.product',
-                'product'
-            )
-            ->andWhere(
-                'product.status = :status'
-            )
-            ->andWhere(
-                'productUser.reservationReminderAt <= :now'
-            )
-            ->andWhere(
-                'productUser.isReminded = :isReminded'
-            )
-            ->setParameter(
-                'status',
-                ProductStatus::RESERVED
-            )
-            ->setParameter(
-                'now',
-                $now
-            )
-            ->setParameter(
-                'isReminded',
-                false
-            )
+            ->join('productUser.product', 'product')
+            ->andWhere('product.status IN (:statuses)')
+            ->andWhere('productUser.reservationReminderAt IS NOT NULL')
+            ->andWhere('productUser.reservationReminderAt <= :now')
+            ->andWhere('productUser.isReminded = :isReminded')
+            ->setParameter('statuses', [
+                ProductStatus::RESERVED,
+                ProductStatus::BUYING,
+                ProductStatus::FUNDED,
+            ])
+            ->setParameter('now', $now)
+            ->setParameter('isReminded', false)
             ->getQuery()
             ->getResult();
     }
